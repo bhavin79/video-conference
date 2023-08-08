@@ -27,42 +27,12 @@ let io = new Server(httpServer, {cors:corsConfig});
 
 app.use(cors(corsConfig));
 
-// const sessionMiddleware =session({
-//     name: 'AuthCookie',
-//     credentials:true, 
-//     secret: "ThefamousSecretOfWebPrograming#$",
-//     saveUninitialized: false,
-//     resave: false,
-//     cookie: { 
-//         maxAge: 6000000,
-//         sameSite: "lax"
-//     }
-// });
 app.use(sessionMiddleware);
 
 io.engine.use(sessionMiddleware);
 io.use(authorizeUser);
 
 configRoutes(app);
-// io.on("connect", async(socket) =>{  
-//     //get meet id for the user
-//     const user = await getUser(socket.request.session.user.emailId);
-    
-//     //add this socket to the namespace
-//     socket.join(user.meetId);
-
-//     await websocketEvenets(socket, user.meetId);
-//     // const req = socket.request;
-//     // console.log(socket.request.session.user, socket.id);
-//     socket.on("disconnect", ()=>{
-//         socket.leave(user.meetId);
-//     });
-
-//     socket.on("reconnect", ()=>{
-//         socket.join(user.meetId);
-//     })
-    
-// });
 
 io.on("connect", (socket) =>{  
     const req = socket.request;
@@ -129,8 +99,3 @@ const start = async () => {
   };
 
 start();
-
-// httpServer.listen(8000, ()=>{
-    
-//     console.log("Server is listening on port 8000 localhost");
-// })
