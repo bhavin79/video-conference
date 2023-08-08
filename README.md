@@ -11,13 +11,13 @@ And now, the frontend – the most challenging part for a backend engineer like 
 It utilizes React. It uses Chakra UI for design, YUP and Formik for input validations,Axios for api calls and client-Socket.IO for WebSocket communication.
 React handles the WebRTC connection between the clients. It also handles the streaming of video between the clients.
 
-##To summarize:
+## To summarize:
 The application follows a 3-tier architecture.
 At the presentation layer, I have implemented ReactJS.
 At the application layer, ExpressJS and Socket.IO are utilized.
 At the data layer, it uses MongoDB.
 
-##Future goals for version 1.2
--[] improve user experence using react
--[] improve webRTC error handling
--[] Implement redis for robust session handling
+## Future goals for version 1.2
+- [] improve user experence using react
+- [] improve webRTC error handling
+- [] Implement redis for robust session handling
