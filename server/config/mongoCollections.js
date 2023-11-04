@@ -6,8 +6,8 @@ const getCollectionFn = (collection) => {
  
   return async () => {
     if (!_col) {
-      const db = await dbConnection(); //This is for offline database
-      // const db = await getClient() //This is for online database.
+      // const db = await dbConnection(); //This is for offline database
+      const db = await getClient() //This is for online database.
       _col = await db.collection(collection);
     }
     return _col;

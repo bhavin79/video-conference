@@ -20,7 +20,7 @@ const closeConnection = async () => {
 export { dbConnection, closeConnection };
 
 
-let client;
+let client = undefined;
 export const connectDB = async (URI)=>{
     client = new MongoClient(URI);
     await client.connect();

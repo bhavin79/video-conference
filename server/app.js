@@ -9,7 +9,7 @@ import websocketEvenets from "./websocket/events.js";
 import sessionMiddleware from "./middleware/sessionMiddleware.js";
 import { corsConfig } from "./config/settings.js";
 import { getUser } from "./data/users.js";
-// import { connectDB } from "./config/mongoConnection.js";
+import { connectDB } from "./config/mongoConnection.js";
 // import { getClient } from "./config/mongoConnection.js";
 import "dotenv/config.js";
 
@@ -79,23 +79,23 @@ io.on("connect", (socket) =>{
     })
     
 });
-httpServer.listen(8000, ()=>{
-  console.log("Server is listening on port 8000 localhost");
-})
+// httpServer.listen(8000, ()=>{
+//   console.log("Server is listening on port 8000 localhost");
+// })
 
 
 // let client
+ 
+const start = async () => {
+    try {
+      await connectDB(process.env.MONGO_URI);
 
-// const start = async () => {
-//     try {
-//       await connectDB(process.env.MONGO_URI);
+      httpServer.listen(8000, ()=>{ 
+        console.log("Server is listening on port 8000 localhost");
+    });
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-//       httpServer.listen(8000, ()=>{ 
-//         console.log("Server is listening on port 8000 localhost");
-//     });
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   };
-
-// start();
+start();
