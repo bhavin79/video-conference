@@ -14,7 +14,7 @@ export const storeMeetId =async(meetId, emailId, password)=>{
     password = await hash.generateHash(password);
 
     console.log(`in data function: ${meetId} ${emailId} ${password}`)
-
+ 
     //databse reference
     const meetsCollection = await meets();
 
@@ -85,7 +85,7 @@ export const updateStoredMeetInfo =async(meetId, emailId)=>{
     emailId = validEmail(emailId);
    
     //databse reference
-    const meetsCollection = await  getClient().collection("meetings");
+    const meetsCollection = await meets();
     let result;
 
     //Query the databse

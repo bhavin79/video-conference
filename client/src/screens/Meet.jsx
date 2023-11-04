@@ -25,8 +25,9 @@ const Meet=()=>{
             setMyStream(stream);
             const offer = await peer.getOffer();
             console.log("offer-callStart", offer);
-            socket.emit("call", {offer});
-            setOfferSent(true);
+                socket.emit("call", {offer});
+                setOfferSent(true);
+            
         },[participantJoined, socket]);
 
     const handleInComingCall = useCallback( async ({ emailId, offer})=>{
@@ -35,18 +36,17 @@ const Meet=()=>{
             await startVideo();
             setParticipantJoined(emailId);
         }
-
         const ans = await peer.getAnswer(offer);
-        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+        const stream = await navigator.mediaDevices.getUserMedia({audio:true, video:true});
         setMyStream(stream);
-        // console.log("answer-incoming",ans);
+        console.log("answer-incoming",ans);
         socket.emit('callAccepted', {ans});
     },[socket]);
    
     const sendStreams = useCallback(()=>{
         for(const track of myStream.getTracks()){
             peer.peer.addTrack(track, myStream);
-        }
+        } 
     }, [myStream]);
 
     const handleCallAccepted = useCallback( async({ans}) =>{
@@ -56,18 +56,23 @@ const Meet=()=>{
     }, [sendStreams]);
    
     const handleNegotiationNeeded= useCallback(async()=>{
-        const offer = await peer.getOffer();
-        socket.emit('peer:nego:needed', {offer});
+            const offer = await peer.getOffer();
+            socket.emit('peer:nego:needed', {offer});
+        
     }, []);
 
     const handleNegotiationIncoming = useCallback(async({offer})=>{
-        const ans = await peer.getAnswer(offer);
-        socket.emit('peer:nego:done', {ans});
+            const ans = await peer.getAnswer(offer);
+            socket.emit('peer:nego:done', {ans});
+        
     },[socket]);
 
     const handleNegotiationFinal = useCallback(async({ans})=>{
-        // await peer.setLocalDescription(ans);
-        socket.emit('peer:nego:done', {ans});
+        if (peer.peer.gathering == "gathering"){
+            console.log('peer:nego:done')
+            await peer.setLocalDescription(ans);
+            socket.emit('peer:nego:done', {ans});
+        }
     },[]);
 
     useEffect(()=>{
@@ -80,9 +85,11 @@ const Meet=()=>{
     useEffect(()=>{
         peer.peer.addEventListener('track', async ev=>{
             console.log("GOT TRACKS!!");
-            setRemoteStream(ev.streams[0])
+            const incomingStream = ev.streams[0].getVideoTracks();
+            setRemoteStream(incomingStream[0])
+            console.log(ev.streams[0].getVideoTracks());
         })
-    },[])
+    }, [])
 
     useEffect(()=>{
         socket.connect();
@@ -134,16 +141,41 @@ const Meet=()=>{
       {remoteStream && (
         <>
           <h1>Remote Stream</h1>
+        {/* <VideoPlayer mediaStreams={remoteStream.getVideoTracks()} /> */}
+          {/* <video autoPlay playsInline ref={(video) => (video.srcObject = remoteStream)} /> */}
+
           <ReactPlayer
             playing
             muted
             height="100px"
             width="200px"
-            url={remoteStream}
-          />
+            url={remoteStream}/>
         </>
       )}
         {}
     </>)
 }
+
+
+const VideoPlayer = ({ mediaStreams }) => {
+  return (
+    <div>
+      {mediaStreams.map((stream, index) => (
+        <div key={index}>
+          <video
+            autoPlay
+            playsInline
+            muted={false}
+            controls={true}
+            ref={(video) => {
+              if (video) {
+                video.srcObject = stream;
+              }
+            }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
 export default Meet;

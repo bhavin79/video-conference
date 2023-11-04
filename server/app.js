@@ -62,8 +62,8 @@ io.on("connect", (socket) =>{
     }); 
 
     socket.on("peer:nego:needed", ({offer})=>{
+      console.log("peer:nego:needed", socket.id)
         socket.to(room).emit('peer:nego:needed', {offer});
-
     });
 
     socket.on("peer:nego:done", ({ans})=>{
