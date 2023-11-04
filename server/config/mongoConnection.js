@@ -20,18 +20,17 @@ const closeConnection = async () => {
 export { dbConnection, closeConnection };
 
 
-// let client;
-// export const connectDB = async (URI)=>{
-//     // return mongoose.connect(URL); 
-//     client = new MongoClient(URI);
-//     await client.connect();
-// }
-// export const getClient =()=>{
-//     if(typeof client == "undefined"){
-//         throw "Error: Client is not connected to database.";
-//     }
-//     return client.db();
-// }
+let client;
+export const connectDB = async (URI)=>{
+    client = new MongoClient(URI);
+    await client.connect();
+}
+export const getClient =()=>{
+    if(typeof client == "undefined"){
+        throw "Error: Client is not connected to database.";
+    }
+    return client.db();
+}
 
 // export const connectionClose = async ()=>{
 //     if(typeof client == "undefined"){
