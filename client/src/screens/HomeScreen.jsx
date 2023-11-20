@@ -2,6 +2,8 @@ import { useState } from "react";
 import CreateMeetForm from "../components/home/CreateMeetForm";
 import JoinMeetForm from "../components/home/JoinMeetForm";
 import { Box, Button, Card, CardBody, HStack, VStack,  } from '@chakra-ui/react'
+import { Divider, Center } from '@chakra-ui/react'
+import { Text , Stack} from '@chakra-ui/react'
 
 const HomeScreen =()=> {
     const [joinMeet, setJoinMeet] = useState(false);
@@ -27,15 +29,19 @@ const HomeScreen =()=> {
           h="100vh"
           spacing="10rem"
     >
-        <Box boxShadow='base' p='6' rounded='md' bg='#fcfcfc' >
-        <Button id= "createMeet"onClick = {handleCreateMeet}>  Create Meeting</Button>
-        {createMeet &&  <CreateMeetForm />}
-        </Box>
-   
-        <Box boxShadow='base' p='6' rounded='md' bg='#fcfcfc' >
+        <Box boxShadow='base' p='6' rounded='md' bg='#fcfcfc'  w="300px" h="400px">
 
-        <Button id = "joinMeet" onClick={handleJoinMeet}>Join Meeting</Button>
-        {joinMeet && <JoinMeetForm />}
+        <Text fontSize='3xl'  mb="10">Create Your meet</Text>
+
+        <CreateMeetForm />
+
+        </Box>
+        <Center height='500px'>
+            <Divider orientation='vertical' colorScheme="black" />
+        </Center>
+        <Box boxShadow='base' p='6' rounded='md' bg='#fcfcfc' w="300px" h="400px" >
+            <Text fontSize='3xl'  mb="10">Join a meet</Text>
+            <JoinMeetForm />
         </Box>
     </HStack>
     </>)

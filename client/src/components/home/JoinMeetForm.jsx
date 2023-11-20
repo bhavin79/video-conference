@@ -20,12 +20,10 @@ const JoinMeetForm =()=>{
                 "password": values.password
             }
             response = await joinMeetApiCall(data);
-            // response = await axios.post(`${baseURLAPI}/meeting/join`,{"meetId": meetId, password: password},{withCredentials:true});
             if (response.data.msg){
                 navigate(`/meet/${values.meetId}`);
             }
         } catch (error) {
-            // console.log(error);
             setError(error.response.data.msg);
         }
     }

@@ -14,9 +14,9 @@ const generateHash = async (secret)=>{
     }
     return hash;
 }
-
+ 
 const compareHash = async (secret, hash)=>{
-    let bool
+    let bool 
     try {
         bool = await bcrypt.compare(secret, hash);
     } catch (error) {

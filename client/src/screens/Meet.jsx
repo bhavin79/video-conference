@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { io } from "socket.io-client";
 import peer from "../service/peer"
 import ReactPlayer from "react-player";
-
+import { Divider, Button, Text } from '@chakra-ui/react'
 
 const Meet=()=>{    
     const socket = new io("localhost:8000", {
@@ -21,7 +21,7 @@ const Meet=()=>{
     },[]);
 
     const startVideo =  useCallback( async ()=>{
-            const stream = await navigator.mediaDevices.getUserMedia({audio:true, video:true});
+            const stream = await navigator.mediaDevices.getUserMedia({ video:true});
             setMyStream(stream);
             const offer = await peer.getOffer();
             console.log("offer-callStart", offer);
@@ -37,16 +37,16 @@ const Meet=()=>{
             setParticipantJoined(emailId);
         }
         const ans = await peer.getAnswer(offer);
-        const stream = await navigator.mediaDevices.getUserMedia({audio:true, video:true});
+        const stream = await navigator.mediaDevices.getUserMedia({video:true});
         setMyStream(stream);
         console.log("answer-incoming",ans);
         socket.emit('callAccepted', {ans});
     },[socket]);
    
     const sendStreams = useCallback(()=>{
-        for(const track of myStream.getTracks()){
-            peer.peer.addTrack(track, myStream);
-        } 
+      myStream.getTracks().forEach((track) => {
+        peer.peer.addTrack(track, myStream);
+      });
     }, [myStream]);
 
     const handleCallAccepted = useCallback( async({ans}) =>{
@@ -83,13 +83,13 @@ const Meet=()=>{
     },[handleNegotiationNeeded]);
 
     useEffect(()=>{
-        peer.peer.addEventListener('track', async ev=>{
+        peer.peer.addEventListener('track', async (ev)=>{
             console.log("GOT TRACKS!!");
-            const incomingStream = ev.streams[0].getVideoTracks();
+            const incomingStream = ev.streams;
             setRemoteStream(incomingStream[0])
-            console.log(ev.streams[0].getVideoTracks());
+            console.log(ev.streams[0]);
         })
-    }, [])
+    })
 
     useEffect(()=>{
         socket.connect();
@@ -119,13 +119,14 @@ const Meet=()=>{
         }
     },[socket, handleInComingCall, handleNegotiationIncoming, handleNegotiationFinal])
     return (<>
-        This is the main room. Here we will have IO socket connetion.
+        <Text fontSize="5xl">This is the main room!</Text>
         {participantJoined && <>
             <br></br>
-            {participantJoined} has joined;
-            <button onClick={sendStreams}>Send Stream</button>
+            {participantJoined} has joined
+            <br></br>
+            <Button onClick={sendStreams}>Send Stream</Button>
         </> }
-            {message};
+            {message}
         {myStream && (
         <>
           <h1>My Stream</h1>
@@ -141,7 +142,7 @@ const Meet=()=>{
       {remoteStream && (
         <>
           <h1>Remote Stream</h1>
-        {/* <VideoPlayer mediaStreams={remoteStream.getVideoTracks()} /> */}
+        {/* <VideoPlayer mediaStreams={remoteStream} /> */}
           {/* <video autoPlay playsInline ref={(video) => (video.srcObject = remoteStream)} /> */}
 
           <ReactPlayer
