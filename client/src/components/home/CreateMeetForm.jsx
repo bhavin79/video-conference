@@ -28,7 +28,9 @@ const CreateMeetForm =()=>{
         }
     }
     const handleStart =()=>{
-        navigate(`/meet/${meetid}`);
+        // navigate(`/meet/${meetid}`);
+        navigate(`/meetNew/${meetid}`);
+
     }
 
     return (

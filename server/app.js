@@ -46,29 +46,28 @@ io.on("connect", (socket) =>{
     const user =  socket.request.session.user;
     const room = user.meetId;
     socket.join(room);
-    socket.on("waiting:joined", (data)=>{
-        socket.to(room).emit("participant:joined", {emailId: user.emailId});
+ 
+    socket.on("user:Present", (data)=>{
+      socket.to(room).emit("user:Present", {emailId: user.emailId});
     });
 
-    socket.on("call", ({offer})=>{
-        // console.log(to);
-        // console.log(offer);
-        socket.to(room).emit('receive', {emailId:user.emailId, offer});
+    socket.on("offer", ({data})=>{
+      console.log("inside offer");
+      const {offer} = data;
+      // console.log(offer);
+      socket.to(room).emit("offer:receive", {msg:offer});
     });
 
-    socket.on("callAccepted", ({ans})=>{
-        console.log(`call accepted ${socket.id} ${ans}`);
-        socket.to(room).emit('callAccepted', {ans});
+    socket.on("answer", ({answer})=>{   
+      // console.log(answer);  
+      socket.to(room).emit("answer:received", {answer});
     }); 
 
-    socket.on("peer:nego:needed", ({offer})=>{
-      console.log("peer:nego:needed", socket.id)
-        socket.to(room).emit('peer:nego:needed', {offer});
+    socket.on("icecandiate", (data)=>{
+      console.log(data);
+      const {candiates} = data;
+      socket.to(room).emit("icecandiate:receive", {msg:data});
     });
-
-    socket.on("peer:nego:done", ({ans})=>{
-        socket.to(room).emit("peer:nego:final", {ans});
-    })
 
     socket.on("disconnect", ()=>{
         // socket.leave(user.meetId);
@@ -76,7 +75,7 @@ io.on("connect", (socket) =>{
 
     socket.on("reconnect", ()=>{
         // socket.join(user.meetId);
-    })
+    }) 
     
 });
 // httpServer.listen(8000, ()=>{
@@ -86,7 +85,7 @@ io.on("connect", (socket) =>{
 
 // let client
  
-const start = async () => {
+const start = async () => { 
     try {
       await connectDB(process.env.MONGO_URI);
 

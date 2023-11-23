@@ -5,6 +5,7 @@ import SignupScreen from './screens/SignupScreen';
 import './App.css';
 import HomeScreen from './screens/HomeScreen';
 import Meet from './screens/Meet';
+import MeetNew from "./screens/Meet2"
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path='/signup' element={<SignupScreen/>}/>
         <Route path='/home' element={<HomeScreen/>} />
         <Route path = "/meet/:id" element={<Meet/>} />
+        <Route path = "/meetNew/:id" element={<MeetNew/>} />
       </Routes>
     </main>
   );
