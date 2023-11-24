@@ -1,9 +1,9 @@
-import { Button } from "@chakra-ui/react";
+import { Button, Grid, GridItem } from "@chakra-ui/react";
 import { useRef } from "react";
 import { useCallback } from "react";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
-
+import ReactPlayer from "react-player";
 
 const MeetNew = ()=>{
     const [participantPresent, setPartcipantPresent] = useState(null);
@@ -31,8 +31,12 @@ const MeetNew = ()=>{
     },[]);
 
     const startVideoAudio =  async()=>{
-        const stream = await navigator.mediaDevices.getUserMedia({audio:true});
-        setLocalStream(stream);    
+        const stream = await navigator.mediaDevices.getUserMedia({video:true});
+        setLocalStream(stream); 
+        stream.getTracks().forEach(track => {
+            console.log(track);
+            peerConnection.current.addTrack(track, stream);
+        });
     };
 
     const handleSendOffer = useCallback(async()=>{
@@ -53,12 +57,12 @@ const MeetNew = ()=>{
             socket.emit("user:Present", {msg:"I am here"});
         }
         setPartcipantPresent(emailId);   
-        if(localStream){
-            localStream.getTracks().forEach(track => {
-                peerConnection.current.addTrack(track, localStream);
-        });
-        }
-    }, [socket, participantPresent , peerConnection, localStream]); 
+        // if(localStream){
+        //     localStream.getTracks().forEach(track => {
+        //         peerConnection.current.addTrack(track, localStream);
+        // });
+        // }
+    }, [socket, participantPresent]); 
 
    
     
@@ -85,7 +89,7 @@ const MeetNew = ()=>{
             socket.emit("icecandiate", {candiates});
             // socket.on({'new-ice-candidate': event.candidate});
         }
-    },[socket, peerConnection])
+    },[socket])
 
     const handleIncomingIceCandidate = useCallback( async(data)=>{
         try {
@@ -95,6 +99,19 @@ const MeetNew = ()=>{
         }
     }, [peerConnection]);
 
+
+    const handleIsConnected = useCallback((event)=>{
+        if(peerConnection.current.connectionState === 'connected'){
+            console.log("connection stable");
+        }
+    },[peerConnection])
+
+    const handleIncomingTracks = useCallback(async (event)=>{
+            console.log("incoming stream", event.streams);
+            if(event.streams){
+                setRemoteStream(event.streams[0]);
+            }
+        },[]);
     useEffect(()=>{
         socket.connect();
         socket.on("Connect", ()=>{});
@@ -117,28 +134,57 @@ const MeetNew = ()=>{
 
         peerConnection.current.addEventListener('icecandidate', handleIceCandidate);
 
-        peerConnection.current.addEventListener('connectionstatechange',(event)=>{
-            if(peerConnection.current.connectionState === 'connected'){
-                console.log("connection stable");
-            }
-        } );
+        peerConnection.current.addEventListener('connectionstatechange',handleIsConnected);
+        
+        // peerConnection.current.addEventListener('track', handleIncomingTracks);
+        // peerConnection.current.addEventListener("icecandidateerror", (event) => {
+        //     console.log(event.errorText);
+        // });
         socket.on("icecandiate:receive", handleIncomingIceCandidate);
         return ()=>{
             socket.off("offer:receive", handleOffer);
             socket.off("answer:received", handleAnswer);
             socket.off("icecandiate:receive", handleIncomingIceCandidate);
+            if (peerConnection.current) {
+                peerConnection.current.removeEventListener('icecandidate', handleIceCandidate);
+                peerConnection.current.removeEventListener('connectionstatechange',handleIsConnected);
+                // peerConnection.current.removeEventListener('track', handleIncomingTracks);
+            } 
         }
 
-    },[socket, handleOffer, handleAnswer, handleIceCandidate, handleIncomingIceCandidate])
+    },[socket, handleOffer, handleAnswer, handleIceCandidate, handleIncomingIceCandidate, handleIsConnected])
+
+
+    useEffect(()=>{
+        peerConnection.current.addEventListener('track', handleIncomingTracks);
+        peerConnection.current.addEventListener("icecandidateerror", (event) => {
+            console.log(event.errorText);
+        });
+        return ()=>{
+            if (peerConnection.current) {
+                peerConnection.current.removeEventListener('track', handleIncomingTracks);
+            } 
+        }
+    },[peerConnection, handleIncomingTracks]);
 
 
     return <>
         Hey there;
         {participantPresent && <>
             <h1>{participantPresent} has joined</h1>
-            <Button onClick={()=>{handleSendOffer()}} >Send offer</Button>
-        </>
-       }
+            <Button onClick={()=>{handleSendOffer()}} marginBottom={20}>Send offer</Button>
+        </>}
+        <Grid templateColumns='repeat(2, 1fr)' gap={6}>
+            <GridItem>
+                <h2>Your stream</h2>
+                {localStream && <ReactPlayer playing muted height="400px" width="400px" url={localStream}></ReactPlayer>
+                }</GridItem>
+            <GridItem>
+                <h2>Remote user</h2>
+                {remoteStream && <ReactPlayer playing muted height="400px" width="400px" url={remoteStream}></ReactPlayer>} 
+                </GridItem>
+        </Grid>
+       
     </>
 }
 

@@ -30,7 +30,7 @@ io.use(authorizeUser);
 configRoutes(app);
 
 io.on("connect", (socket) =>{  
-    const req = socket.request;
+    const req = socket.request; 
 
     //get meet id for the user
     socket.use((__, next) => {
@@ -42,7 +42,7 @@ io.on("connect", (socket) =>{
           }
         });
         req.session.save();
-      });
+      }); 
     const user =  socket.request.session.user;
     const room = user.meetId;
     socket.join(room);
@@ -61,15 +61,15 @@ io.on("connect", (socket) =>{
     socket.on("answer", ({answer})=>{   
       // console.log(answer);  
       socket.to(room).emit("answer:received", {answer});
-    }); 
+    });  
 
     socket.on("icecandiate", (data)=>{
-      console.log(data);
+      console.log(data); 
       const {candiates} = data;
       socket.to(room).emit("icecandiate:receive", {msg:data});
     });
 
-    socket.on("disconnect", ()=>{
+    socket.on("disconnect", ()=>{ 
         // socket.leave(user.meetId);
     });
 
