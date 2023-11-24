@@ -10,6 +10,7 @@ import sessionMiddleware from "./middleware/sessionMiddleware.js";
 import { corsConfig } from "./config/settings.js";
 import { getUser } from "./data/users.js";
 import { connectDB } from "./config/mongoConnection.js";
+// import { getClient } from "./config/mongoConnection.js";
 import "dotenv/config.js";
 
 const app = express();

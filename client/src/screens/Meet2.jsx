@@ -57,6 +57,11 @@ const MeetNew = ()=>{
             socket.emit("user:Present", {msg:"I am here"});
         }
         setPartcipantPresent(emailId);   
+        // if(localStream){
+        //     localStream.getTracks().forEach(track => {
+        //         peerConnection.current.addTrack(track, localStream);
+        // });
+        // }
     }, [socket, participantPresent]); 
 
    
@@ -131,6 +136,10 @@ const MeetNew = ()=>{
 
         peerConnection.current.addEventListener('connectionstatechange',handleIsConnected);
         
+        // peerConnection.current.addEventListener('track', handleIncomingTracks);
+        // peerConnection.current.addEventListener("icecandidateerror", (event) => {
+        //     console.log(event.errorText);
+        // });
         socket.on("icecandiate:receive", handleIncomingIceCandidate);
         return ()=>{
             socket.off("offer:receive", handleOffer);
