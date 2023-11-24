@@ -19,5 +19,5 @@ At the data layer, it uses MongoDB.
 
 ## Future goals for version 1.2
 - [ ] improve user experence using react
-- [ ] improve webRTC error handling
+- [X] improve webRTC error handling
 - [ ] Implement redis for robust session handling
