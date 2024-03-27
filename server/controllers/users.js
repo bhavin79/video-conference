@@ -7,6 +7,7 @@ export const postLogin = async(req, res)=>{
     console.log(req.body);             
     //validate the input
     let {emaildId: email, password} = req.body;
+
     try { 
         email = validEmail(email);
         password = validPassword(password); 
@@ -67,7 +68,7 @@ export const postSignup = async(req, res)=>{
 
 export const getLogout =(req, res)=>{
     //destroy session;
-    
+
 }
 
  
