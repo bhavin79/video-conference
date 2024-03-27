@@ -67,6 +67,7 @@ export const postSignup = async(req, res)=>{
 
 export const getLogout =(req, res)=>{
     //destroy session;
+    
 }
 
  

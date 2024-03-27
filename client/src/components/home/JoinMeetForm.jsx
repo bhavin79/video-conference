@@ -23,7 +23,6 @@ const JoinMeetForm =()=>{
             if (response.data.msg){
                 // navigate(`/meet/${values.meetId}`);
                 navigate(`/meet/${values.meetId}`);
-
             }
         } catch (error) {
             setError(error.response.data.msg);
