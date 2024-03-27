@@ -4,9 +4,9 @@ import { useCallback } from "react";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import ReactPlayer from "react-player";
-import { ping } from "../service/apiCalls";
+import { ping } from "../../service/apiCalls";
 
-const MeetNew = ()=>{
+const Meet = ()=>{
     const [participantPresent, setPartcipantPresent] = useState(null);
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
@@ -200,4 +200,4 @@ const MeetNew = ()=>{
     </>
 }
 
-export default MeetNew;
+export default Meet;

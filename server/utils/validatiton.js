@@ -65,6 +65,6 @@ export const validPermision =(permision)=>{
     if(permision != "unresolved" && permision != "admit" && permision != "deny"){
         throw "valid permision required";
     }
-
+    
     return permision;
 }

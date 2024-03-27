@@ -22,7 +22,7 @@ const JoinMeetForm =()=>{
             response = await joinMeetApiCall(data);
             if (response.data.msg){
                 // navigate(`/meet/${values.meetId}`);
-                navigate(`/meetNew/${values.meetId}`);
+                navigate(`/meet/${values.meetId}`);
 
             }
         } catch (error) {

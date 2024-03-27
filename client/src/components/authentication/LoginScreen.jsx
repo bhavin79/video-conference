@@ -1,7 +1,7 @@
-import {useState} from "react";
 import { useNavigate } from "react-router-dom";
+import {useState} from "react";
 import {Form, Formik} from "formik";
-import { LogInSchema } from "./validationSchema/authSchema";
+import { LogInSchema } from "./authSchema";
 import { CustomInputField } from "../CustomInputField";
 import { loginApiCall } from "../../service/apiCalls";
 import { Box, Button, Heading, VStack, Text , Link} from "@chakra-ui/react";
@@ -66,4 +66,11 @@ const LoginForm = ()=>{
     </VStack>
     )
 }
-export default LoginForm;
+const LoginScreen = ()=>{  
+    return (
+        <>
+        <LoginForm/>
+        </>
+    )
+}
+export default LoginScreen;

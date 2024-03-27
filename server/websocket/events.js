@@ -1,6 +1,7 @@
 import { getStoredMeetId, updateStoredMeetInfo } from "../data/meets.js";
 import { validUUID } from "../utils/validatiton.js";
 import { getUser } from "../data/users.js";
+
 const meetingSetUp = async(emailId, meetId)=>{
     meetId = validUUID(meetId);
    //fetch the meet info;
@@ -17,7 +18,7 @@ const meetingSetUp = async(emailId, meetId)=>{
             return "Participant yet to join";
         }
         //else 
-        return;
+        return; 
     }
     //if email belongs to participant
     if(meetInfo.user.emailId == emailId){

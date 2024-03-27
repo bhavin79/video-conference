@@ -1,11 +1,10 @@
 import { Route, Routes } from 'react-router-dom';
-import LoginScreen from "./screens/LoginScreen";
-import SignupScreen from './screens/SignupScreen';
+import LoginScreen from "./components/authentication/LoginScreen";
+import SignupScreen from './components/authentication/SignupScreen';
 
 import './App.css';
-import HomeScreen from './screens/HomeScreen';
-import Meet from './screens/Meet';
-import MeetNew from "./screens/Meet2"
+import HomeScreen from './components/home/HomeScreen';
+import Meet from "./components/meet/Meet"
 
 function App() {
   return (
@@ -15,7 +14,6 @@ function App() {
         <Route path='/signup' element={<SignupScreen/>}/>
         <Route path='/home' element={<HomeScreen/>} />
         <Route path = "/meet/:id" element={<Meet/>} />
-        <Route path = "/meetNew/:id" element={<MeetNew/>} />
       </Routes>
     </main>
   );

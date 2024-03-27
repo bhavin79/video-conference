@@ -2,7 +2,7 @@ import {useState,} from "react";
 import { useNavigate } from "react-router-dom";
 import { Formik, Form } from "formik";
 import { CustomInputField } from "../CustomInputField"
-import { SignUpSchema } from "./validationSchema/authSchema"
+import { SignUpSchema } from "./authSchema"
 import { signUpApiCall } from "../../service/apiCalls";
 import { Box, Button, Heading, VStack, Text , Link} from "@chakra-ui/react";
 
@@ -74,4 +74,11 @@ const SignUpForm =()=>{
     </VStack>
     )
 }
-export default SignUpForm;
+const SignupScreen =()=>{
+    return(
+        <>
+            <SignUpForm />
+        </>
+    )
+}
+export default SignupScreen;

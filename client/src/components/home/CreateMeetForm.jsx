@@ -29,7 +29,7 @@ const CreateMeetForm =()=>{
     }
     const handleStart =()=>{
         // navigate(`/meet/${meetid}`);
-        navigate(`/meetNew/${meetid}`);
+        navigate(`/meet/${meetid}`);
 
     }
 

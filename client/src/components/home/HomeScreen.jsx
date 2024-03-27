@@ -1,6 +1,6 @@
 import { useState } from "react";
-import CreateMeetForm from "../components/home/CreateMeetForm";
-import JoinMeetForm from "../components/home/JoinMeetForm";
+import CreateMeetForm from "./CreateMeetForm";
+import JoinMeetForm from "./JoinMeetForm";
 import { Box, Button, Card, CardBody, HStack, VStack,  } from '@chakra-ui/react'
 import { Divider, Center } from '@chakra-ui/react'
 import { Text , Stack} from '@chakra-ui/react'
