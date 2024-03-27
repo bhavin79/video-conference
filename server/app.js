@@ -24,8 +24,14 @@ app.use(cors(corsConfig));
 
 app.use(sessionMiddleware);
 
+
 io.engine.use(sessionMiddleware);
 io.use(authorizeUser);
+
+app.use((req, res, next) => {
+  req.io = io;
+  return next();
+});
 
 configRoutes(app);
 
@@ -47,9 +53,9 @@ io.on("connect", (socket) =>{
     const room = user.meetId;
     socket.join(room);
  
-    socket.on("user:Present", (data)=>{
-      socket.to(room).emit("user:Present", {emailId: user.emailId});
-    });
+    // socket.on("user:Present", (data)=>{
+    //   socket.to(room).emit("user:Present", {emailId: user.emailId});
+    // });
 
     socket.on("offer", ({data})=>{
       console.log("inside offer");
@@ -78,23 +84,23 @@ io.on("connect", (socket) =>{
     }) 
     
 });
-// httpServer.listen(8000, ()=>{
-//   console.log("Server is listening on port 8000 localhost");
-// })
+httpServer.listen(8000, ()=>{
+  console.log("Server is listening on port 8000 localhost");
+})
 
 
 // let client
  
-const start = async () => { 
-    try {
-      await connectDB(process.env.MONGO_URI);
+// const start = async () => { 
+//     try {
+//       await connectDB(process.env.MONGO_URI);
 
-      httpServer.listen(8000, ()=>{ 
-        console.log("Server is listening on port 8000 localhost");
-    });
-    } catch (error) {
-      console.log(error);
-    }
-  };
+//       httpServer.listen(8000, ()=>{ 
+//         console.log("Server is listening on port 8000 localhost");
+//     });
+//     } catch (error) {
+//       console.log(error);
+//     }
+//   };
 
-start();
+// start();

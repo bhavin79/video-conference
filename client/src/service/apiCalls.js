@@ -23,4 +23,9 @@ const joinMeetApiCall = async(data)=>{
     let response = await backend.post("meeting/join", data);
     return response;
 }
-export {loginApiCall, signUpApiCall, createMeetApiCall, joinMeetApiCall};
+
+const ping = async()=>{
+    let response = await backend.get("meeting/ping");
+    return response;
+}
+export {loginApiCall, signUpApiCall, createMeetApiCall, joinMeetApiCall, ping};

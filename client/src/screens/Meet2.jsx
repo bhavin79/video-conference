@@ -4,6 +4,7 @@ import { useCallback } from "react";
 import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import ReactPlayer from "react-player";
+import { ping } from "../service/apiCalls";
 
 const MeetNew = ()=>{
     const [participantPresent, setPartcipantPresent] = useState(null);
@@ -54,9 +55,11 @@ const MeetNew = ()=>{
 
     const handleUser2Joined = useCallback(async({emailId})=>{
         if(!participantPresent){
-            socket.emit("user:Present", {msg:"I am here"});
+            // socket.emit("user:Present", {msg:"I am here"});
+            await ping();
         }
-        setPartcipantPresent(emailId);   
+        setPartcipantPresent(emailId);
+        await handleSendOffer();
         // if(localStream){
         //     localStream.getTracks().forEach(track => {
         //         peerConnection.current.addTrack(track, localStream);
@@ -116,12 +119,19 @@ const MeetNew = ()=>{
         socket.connect();
         socket.on("Connect", ()=>{});
     }, [socket]);
+
+    // useEffect(()=>{
+    //     socket.on("test", ()=>{
+    //         console.log("testing remote socket");
+    //     })
+    // },[socket])
     
     useEffect(()=>{  
         if(!participantPresent){
             console.log(participantPresent);
             socket.on("user:Present", handleUser2Joined)
-            socket.emit("user:Present",{msg:"I am here"});
+            // socket.emit("user:Present",{msg:"I am here"});
+            ping();
         }
         return ()=>{
             socket.off("user:Present", handleUser2Joined);  
@@ -166,6 +176,8 @@ const MeetNew = ()=>{
             } 
         }
     },[peerConnection, handleIncomingTracks]);
+
+
 
 
     return <>

@@ -56,7 +56,6 @@ const LoginForm = ()=>{
                 <br/>
                 <Button disabled={isSubmitting} type="submit">
                     Submit</Button>
-               
                 <br/>
                 {error}
                 </Form>

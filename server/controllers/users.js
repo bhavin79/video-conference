@@ -3,10 +3,11 @@ import hash from "../utils/encryption.js";
 import { validEmail, validPassword } from "../utils/validatiton.js";
 
 export const postLogin = async(req, res)=>{  
+    console.log("login route")
     console.log(req.body);             
     //validate the input
     let {emaildId: email, password} = req.body;
-    try {
+    try { 
         email = validEmail(email);
         password = validPassword(password); 
     } catch (error) {
