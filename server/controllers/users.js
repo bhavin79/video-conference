@@ -15,7 +15,7 @@ export const postLogin = async(req, res)=>{
         return res.status(400).json({msg:"Provide valid format for Email id or password"});
     }
 
-
+ 
     let user;
     //check if email exist
     try {
