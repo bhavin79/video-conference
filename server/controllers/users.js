@@ -68,7 +68,8 @@ export const postSignup = async(req, res)=>{
 
 export const getLogout =(req, res)=>{
     //destroy session;
-
+    req.session.destroy();
+    return res.session(200).json({msg: "Successfully logouts"})
 }
 
  

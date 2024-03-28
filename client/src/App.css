@@ -38,3 +38,20 @@
     transform: rotate(360deg);
   }
 }
+
+
+.nav{
+  display: flex;
+  justify-content: space-around;
+  font-size: 18px;
+  font-weight: 400;
+  height: 3rem;
+  background-color: #383838;
+  color: antiquewhite;
+  align-items: center;
+}
+.navLinks{
+    display: flex;
+    justify-content: space-around;
+    width: 8em;
+}

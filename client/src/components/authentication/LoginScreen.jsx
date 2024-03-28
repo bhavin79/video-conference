@@ -5,20 +5,21 @@ import { LogInSchema } from "./authSchema";
 import { CustomInputField } from "../CustomInputField";
 import { loginApiCall } from "../../service/apiCalls";
 import { Box, Button, Heading, VStack, Text , Link} from "@chakra-ui/react";
+import { useAuth } from "../conextAPI/authContext";
 
 const LoginForm = ()=>{      
     const navigate = useNavigate();
     const [error, setError] = useState("");
+    const {loginHandle} = useAuth();
 
     const sendLoginCredentials = async(values)=>{
-        console.log("Hie ther");
-
         try {
             const data = {"emaildId": values.emailId,"password":values.password};
-            console.log("here in form")
             let response = await loginApiCall(data);
             console.log(response);
-            navigate("/home");
+            loginHandle();
+            localStorage.setItem("username", values.emailId);
+            navigate("/");
         } catch (error) {
             setError(error.response.data.msg);
         }

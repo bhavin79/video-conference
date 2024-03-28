@@ -28,4 +28,10 @@ const ping = async()=>{
     let response = await backend.get("meeting/ping");
     return response;
 }
+
+const logoutApiCall = async()=>{
+    let response = await backend.get("logout");
+    return response;
+}
+
 export {loginApiCall, signUpApiCall, createMeetApiCall, joinMeetApiCall, ping};

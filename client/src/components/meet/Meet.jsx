@@ -5,12 +5,23 @@ import { useState, useEffect } from "react";
 import { io } from "socket.io-client";
 import ReactPlayer from "react-player";
 import { ping } from "../../service/apiCalls";
+import { useAuth } from "../conextAPI/authContext";
+import { useNavigate } from "react-router-dom";
+
 
 const Meet = ()=>{
     const [participantPresent, setPartcipantPresent] = useState(null);
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
-    
+    const navigate = useNavigate();
+    const {loggedIn} = useAuth();
+
+    useEffect(()=>{
+        if (!loggedIn){
+            navigate("/login");
+        }
+    },[loggedIn])
+
     const socket = new io("localhost:8000", {
             autoConnect: false,
             withCredentials:true,

@@ -4,11 +4,21 @@ import JoinMeetForm from "./JoinMeetForm";
 import { Box, Button, Card, CardBody, HStack, VStack,  } from '@chakra-ui/react'
 import { Divider, Center } from '@chakra-ui/react'
 import { Text , Stack} from '@chakra-ui/react'
+import { useAuth } from "../conextAPI/authContext";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const HomeScreen =()=> {
     const [joinMeet, setJoinMeet] = useState(false);
     const [createMeet, setCreateMeet] = useState(false);
-    
+    const navigate = useNavigate();
+    const {loggedIn} = useAuth();
+
+    useEffect(()=>{
+        if (!loggedIn){
+            navigate("/login");
+        }
+    },[loggedIn])
 
     //handle on click event for meeting START
     const handleCreateMeet=()=>{
