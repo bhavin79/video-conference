@@ -8,6 +8,7 @@ const schema = {
 export const LogInSchema = ()=>{
     return yup.object().shape(schema);
 }
+
 export const SignUpSchema =()=>{
     schema["rePassword"] = yup.string().oneOf([yup.ref("password"), null], "Password do not match").required("Required");
     return yup.object().shape(schema);

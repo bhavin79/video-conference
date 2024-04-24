@@ -188,8 +188,10 @@ const Meet = ()=>{
         }
     },[peerConnection, handleIncomingTracks]);
 
+    const callEnd =()=>{
+        peerConnection.current.close();
 
-
+    }
 
     return <>
         Hey there;
@@ -207,6 +209,10 @@ const Meet = ()=>{
                 {remoteStream && <ReactPlayer playing muted height="400px" width="400px" url={remoteStream}></ReactPlayer>} 
                 </GridItem>
         </Grid>
+        <div>
+            <button onClick={()=>callEnd()}>end</button>
+
+        </div>
        
     </>
 }

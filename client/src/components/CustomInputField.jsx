@@ -8,10 +8,6 @@ export const CustomInputField =({label, ...props}) =>{
             <FormLabel>{label}</FormLabel>
             <Input {...field} {...props} />
             <FormErrorMessage>{meta.error}</FormErrorMessage>
-            {/* <Input {...field} {...props} 
-                className={meta.touched && meta.error ? "input-error" : ""}
-            /> 
-            {meta.touched && meta.error && <div className="error">{meta.error}</div>} */}
         </FormControl>
     )
 }
