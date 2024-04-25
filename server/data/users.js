@@ -1,7 +1,7 @@
 import {users} from "../config/mongoCollections.js";
-// import { getClient } from "../config/mongoConnection.js";
 import { validEmail, validPassword, validUUID } from "../utils/validatiton.js";
 import hash from "../utils/encryption.js";
+
 export const getUser = async (email) => {
     //validation
     email = validEmail(email);
@@ -37,6 +37,34 @@ export const addUser = async(email, password)=>{
         "emailId": email,
         "password":password,
         "meetId": ""
+    });
+    
+    if (!user.acknowledged || !user.insertedId) throw 'Could not add user';
+    const newId = user.insertedId.toString();
+    return newId;
+}
+
+
+export const newAddUser= async(email, password) =>{
+    email = validEmail(email);
+    password = validPassword(password);
+
+    //hash password
+    password = await hash.generateHash(password);
+
+    //db reference
+    const usersCollection = await users();
+    
+    
+    //query the database
+    let user = await usersCollection.insertOne({
+        "emailId": email,
+        "password":password,
+        "PreviousCalls": [],
+        "currentCalll": {
+            "CallTo": "", 
+            "meetId": "",
+        }
     });
     
     if (!user.acknowledged || !user.insertedId) throw 'Could not add user';

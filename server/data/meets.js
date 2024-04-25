@@ -101,7 +101,7 @@ export const updateStoredMeetInfo =async(meetId, emailId)=>{
 export const updateUserPermision =async(emailId)=>{
      //validation
      meetId = validUUID(meetId);
-     emailId = validEmail(emailId);
+     emailId = validEmail(emailId);    
  
  
      //databse reference

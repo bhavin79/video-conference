@@ -1,4 +1,4 @@
-import {getUser, addUser} from "../data/users.js"
+import {getUser, addUser, newAddUser} from "../data/users.js"
 import hash from "../utils/encryption.js";
 import { validEmail, validPassword } from "../utils/validatiton.js";
 
@@ -58,7 +58,7 @@ export const postSignup = async(req, res)=>{
     //Create user
     let createUser;
     try {
-        createUser = await addUser(email, password); 
+        createUser = await newAddUser(email, password); 
     } catch (error) {
        return res.status(500).json({msg:error});
     }

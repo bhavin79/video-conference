@@ -34,4 +34,13 @@ const logoutApiCall = async()=>{
     return response;
 }
 
-export {loginApiCall, signUpApiCall, createMeetApiCall, joinMeetApiCall, ping};
+const callApiCall = async(data)=>{
+    let response = await backend.post("call/call", data);
+    return response;
+}
+
+const callAcceptApiCall = async(data)=>{
+    let response = await backend.post("call/callAccept", data);
+    return response;
+}
+export {loginApiCall, signUpApiCall, createMeetApiCall, joinMeetApiCall, ping, logoutApiCall, callApiCall, callAcceptApiCall};

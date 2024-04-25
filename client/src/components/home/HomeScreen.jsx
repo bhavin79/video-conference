@@ -7,6 +7,7 @@ import { Text , Stack} from '@chakra-ui/react'
 import { useAuth } from "../conextAPI/authContext";
 import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
+import Call from "../call/Call";
 
 const HomeScreen =()=> {
     const [joinMeet, setJoinMeet] = useState(false);
@@ -34,6 +35,9 @@ const HomeScreen =()=> {
     
     return (
     <>
+    <>
+        <Call/>
+    </>
     <HStack
           justify="center"
           h="100vh"

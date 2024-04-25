@@ -19,12 +19,12 @@ export const validString = (string, parameter = "input", maxLength=null) => {
 };
 
 export const validEmail =(email)=>{
-    email = validString(email, "email");
-    const regex = new RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
+    // email = validString(email, "email");
+    // const regex = new RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/);
     
-    if(!regex.test(email)){
-        throw `Valid email id needed ${email}`;
-    }
+    // if(!regex.test(email)){
+    //     throw `Valid email id needed ${email}`;
+    // }
     return email.toLowerCase();
 }
 
