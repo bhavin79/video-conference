@@ -1,4 +1,3 @@
-import { Button, Grid, GridItem } from "@chakra-ui/react";
 import { useRef } from "react";
 import { useCallback } from "react";
 import { useState, useEffect } from "react";
@@ -7,7 +6,6 @@ import ReactPlayer from "react-player";
 import { ping } from "../../service/apiCalls";
 import { useAuth } from "../conextAPI/authContext";
 import { useNavigate } from "react-router-dom";
-
 
 const Meet = ()=>{
     const [participantPresent, setPartcipantPresent] = useState(null);
@@ -27,7 +25,6 @@ const Meet = ()=>{
             withCredentials:true,
         });
 
-    // let peerConnection = undefined;
     const peerConnection = useRef(null);
     
     useEffect(()=>{
@@ -193,28 +190,26 @@ const Meet = ()=>{
 
     }
 
-    return <>
-        Hey there;
+    return <div className="flex justify-center items-center h-screen">
         {participantPresent && <>
             <h1>{participantPresent} has joined</h1>
-            <Button onClick={()=>{handleSendOffer()}} marginBottom={20}>Send offer</Button>
+            <button className="btn" onClick={()=>{handleSendOffer()}} marginBottom={20}>Send offer</button>
         </>}
-        <Grid templateColumns='repeat(2, 1fr)' gap={6}>
-            <GridItem>
+        <div className="grid grid-cols-2 gap-32 ">
+            <div>
                 <h2>Your stream</h2>
                 {localStream && <ReactPlayer playing muted height="400px" width="400px" url={localStream}></ReactPlayer>
-                }</GridItem>
-            <GridItem>
+                }</div>
+            <div>
                 <h2>Remote user</h2>
                 {remoteStream && <ReactPlayer playing muted height="400px" width="400px" url={remoteStream}></ReactPlayer>} 
-                </GridItem>
-        </Grid>
+                </div>
+        </div>
         <div>
             <button onClick={()=>callEnd()}>end</button>
 
         </div>
-       
-    </>
+    </div>  
 }
 
 export default Meet;

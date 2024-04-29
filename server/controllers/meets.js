@@ -6,9 +6,10 @@ import hash from "../utils/encryption.js"
 export const createMeet = async(req, res)=>{
     console.log(req.session.user); 
     //  check if the user is logged in;
-    if(typeof req.session.user.emailId == undefined){
+    if(!req.session.user ||  !req.session.user.emailId){
         return res.status(403).json({msg: "Please log in"});
-    }
+    };
+
     
     //validating input
     let {password} = req.body;
@@ -33,9 +34,10 @@ export const createMeet = async(req, res)=>{
 
 export const joinMeet = async(req, res)=>{ 
     //  check if the user is logged in;
-    if(typeof req.session.user == undefined){
+    if(!req.session.user ||  !req.session.user.emailId){
         return res.status(403).json({msg: "Please log in"});
-    }
+    };
+
 
     let meetId = req.body.meetId;
     let password = req.body.password;

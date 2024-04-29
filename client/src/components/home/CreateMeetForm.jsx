@@ -1,20 +1,31 @@
 import { useNavigate } from "react-router-dom";
-import {Form, Formik} from "formik";
-import { CustomInputField } from "../CustomInputField";
 import { createMeetApiCall } from "../../service/apiCalls";
 import { useState } from "react";
-import { VStack, Button, HStack, useClipboard, Input, InputGroup , InputRightElement} from "@chakra-ui/react";
-import * as yup from "yup";
 import {BiCopy} from "react-icons/bi";
 import {FcVideoCall} from "react-icons/fc"
+import { useForm } from "react-hook-form";
 
 const CreateMeetForm =()=>{
 
     const navigate = useNavigate();
     const [error, setError] = useState("");
     const [meetid, setMeetingId] = useState("");
-    const { onCopy, hasCopied } = useClipboard(meetid);
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+      } = useForm();
 
+      const copyToClipboard = async () => {
+        try {
+            const permissions = await navigator.permissions.query({name: "clipboard-write"})
+            if (permissions.state === "granted" || permissions.state === "prompt") {
+                await navigator.clipboard.writeText(meetid);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
     const getMeetingId = async(values)=>{
         // axios.defaults.withCredentials = true;
         let response;
@@ -34,48 +45,42 @@ const CreateMeetForm =()=>{
     }
 
     return (
-        <VStack
-        justify="center"
-        spacing="0.3rem"
-      >
-        <Formik
-            initialValues={{password:""}}
-            validationSchema={yup.object().shape({
-                password: yup.string().max(5).required("Required")
-            })}
-            onSubmit={getMeetingId}
-        >
-        {({isSubmitting})=>( 
-            <Form>
-                <CustomInputField 
-                    label="Password"
-                    type ="text"
-                    name="password"
-                    placeholder="1234"
-                    />
-                <br></br>
-                <Button disabled={isSubmitting} bg = 'green.300'type="submit" mb="6" borderRadius="40">Create</Button>
-                {error}
-            </Form>
-            )} 
-        </Formik>
+        <div className="flex flex-col items-center">
+            <form className="form-control w-full max-w-xs" onSubmit={handleSubmit(getMeetingId)}>
+                <label htmlFor = "password" className="label">Password:</label> 
+                <input 
+                    type="password" 
+                    id="password"
+                    className= "input input-bordered w-full max-w-xs text-black" 
+                    placeholder="Add password"
+                    {...register("password", {
+                        required: "password is Required",
+                        validate:{
+                            justSpaces: (name)=>{
+                                    if(name.trim().length==0){
+                                        return "password can't be empty spaces";
+                                }
+                            }
+                        },
+                    })}/>
+                    {errors && errors.password && <p className="label text-orange-600" >{errors.password.message}</p>}
+                    <div className="flex justify-center my-5">
+                        <button className="btn bg-green-500 hover:bg-green-200 border-none" type="submit">Create</button>
+                    </div>
+            </form>
        
         {meetid && <>
-                    <HStack spacing="4" align="center">
-                    <InputGroup>
-                        <Input value={meetid} isReadOnly placeholder={meetid} />    
-                        <InputRightElement width="3.2rem">
-                            <Button onClick={onCopy} >
-                                <BiCopy />   
-                            </Button>   
-                        </InputRightElement>                
-                    </InputGroup>
-                    </HStack>        
-                       <FcVideoCall onClick={handleStart} size="40"/>
+                    <div className="flex flex-col">
+                        <div className="border border-solid flex rounded-lg">
+                            <input className="pl-2 text-black rounded-l-lg " value={meetid} readonly/>
+                            <button className="btn h-full btn-md bg-sky-100 " onClick={copyToClipboard}> <BiCopy /> </button>
+                        </div>
+                    </div>      
+                        <FcVideoCall  onClick={handleStart} size="40"/>
                 </>}
     
        
-        </VStack>
+        </div>
     )
 }
 

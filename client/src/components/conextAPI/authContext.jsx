@@ -11,7 +11,7 @@ const ApiProvider = ({ children }) => {
         localStorage.setItem("userLoggedIn", true);
         setLoggedIn(true);
     }
-
+    
   return (
     <ApiContext.Provider value={{ loggedIn, loginHandle,logoutHandle }}>{children}</ApiContext.Provider>
   );

@@ -1,78 +1,156 @@
 import {useState,} from "react";
 import { useNavigate } from "react-router-dom";
-import { Formik, Form } from "formik";
-import { CustomInputField } from "../CustomInputField"
-import { SignUpSchema } from "./authSchema"
+
 import { signUpApiCall } from "../../service/apiCalls";
-import { Box, Button, Heading, VStack, Text , Link} from "@chakra-ui/react";
+import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 
 
 const SignUpForm =()=>{
     
     const navigate = useNavigate();
     const [error, setError] = useState("");
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        watch
+      } = useForm();
 
-    const sendSignUpCredentials = async(values)=>{        
+    const sendSignUpCredentials = async(formData)=>{        
         const data = {
-            "emaildId": values.emailId,
-            "password":values.password 
+            "emaildId": formData.emailId,
+            "password":formData.password 
         };
         try {
             let response = await signUpApiCall(data);
             // let response = await axios.post(`${baseURL}/user/signup`, );
             navigate(`/login`);
         } catch (error) {
+            console.log(error);
             setError(error.response.data.msg);
         }
     }
-    
-    return(
-        <VStack
-        justify="center"
-        h="100vh"
-        spacing="0.3rem"
-      >
-        <Box boxShadow='base' p='6' rounded='md' bg='#fcfcfc' padding='7rem'> 
-        <Heading paddingBottom='1rem'>SignUp!</Heading>
-        <Formik
-            initialValues={{emailId: "", password:"" , rePassword:""}}   
-            validationSchema={SignUpSchema}
-            onSubmit={sendSignUpCredentials}
-         >
-            {({ isSubmitting }) => (
-                <Form>
-                <CustomInputField
-                    label="Email id"
-                    name="emailId"
-                    type="email"
-                    placeholder="example@example.com"
-                />
-                <br/>
-                 <CustomInputField
-                    label="Password"
-                    name="password"
-                    type="password"
-                    placeholder=""
-                />
-                <br/>
-                 <CustomInputField
-                    label="confirm Password"
-                    name="rePassword"
-                    type="password"
-                    placeholder=""
-                />
-                <br/>
-                <Button disabled={isSubmitting} type="submit">
-                    Submit
-                </Button>
-                <Text fontSize='xs' paddingTop='1rem'>{error}</Text>
-                </Form>
-        )}
-        </Formik>
-        <Text fontSize='xs' paddingTop='1rem'>Already have an account? <Link color='teal.500' href="/login">click here</Link> to login</Text>
-     </Box>
-    </VStack>
-    )
+    return <div className="flex justify-center h-screen items-center">
+    <div  className="card w-1/3  bg-neutral text-neutral-content shadow-lg py-16 px-5 ">
+            <div className="card-body items-center text-center">
+            <h2 className="card-title mb-5 text-3xl">SignUp!</h2>
+            <form className="form-control w-full max-w-xs" onSubmit={handleSubmit(sendSignUpCredentials)}>
+                <div className="mb-2">
+                <label htmlFor="emailId" className="label">Email Id: </label> 
+                    <input 
+                        type="email" 
+                        id="emailId"
+                        className= "input input-bordered w-full max-w-xs" 
+                        placeholder="Add Email Id"
+                        {...register("emailId", {
+                            required: "Email address is required",
+                            validate:{
+                                justSpaces: (name)=>{
+                                        if(name.trim().length==0){
+                                            return "email address can't be empty spaces";
+                                    }
+                                }
+                            },
+                            pattern: {
+                                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                                message: "invalid email address"
+                            }
+                        })}/>
+                        {errors && errors.emailId && <p className="label text-orange-600" >{errors.emailId.message}</p>}
+                    </div>
+
+                <div className="mb-8">
+                    <label htmlFor="password" className="label">Password </label> 
+                        <input 
+                            type="password" 
+                            id="password"
+                            className= "input input-bordered w-full max-w-xs" 
+                            placeholder="Add password"
+                            {...register("password", {
+                                required: "Password is required",
+                                validate:{
+                                    justSpaces: (name)=>{
+                                            if(name.trim().length==0){
+                                                return "password can't be empty spaces";
+                                        }
+                                    }
+                                },
+                            })}/>
+                            {errors && errors.password && <p className="label text-orange-600" >{errors.password.message}</p>}
+                    </div>
+                    <div className="mb-8">
+                    <label htmlFor="rePassword" className="label">Confirm Password </label> 
+                        <input 
+                            type="password" 
+                            id="rePassword"
+                            className= "input input-bordered w-full max-w-xs" 
+                            placeholder="Confirm password"
+                            {...register("rePassword", {
+                                required: "Password is required",
+                                validate: (val)=>{
+                                    if (watch('password') != val) {
+                                        return "Passwords do no match";
+                                      }
+                                },
+                            })}/>
+                            {errors && errors.rePassword && <p className="label text-orange-600" >{errors.rePassword.message}</p>}
+                    </div>
+                    <button className="btn w-2/4 self-center mb-6" type="submit">SingUp!</button>
+            </form>
+            <p className="text-base"> Already have an account? <Link to="/login" className="text-lime-600 hover:text-lime-400">click here</Link> to login</p>
+            </div>
+            {error && <p className="text-orange-600">{error}</p>}
+
+        </div>
+    </div>
+    // return(
+    //     <VStack
+    //     justify="center"
+    //     h="100vh"
+    //     spacing="0.3rem"
+    //   >
+    //     <Box boxShadow='base' p='6' rounded='md' bg='#fcfcfc' padding='7rem'> 
+    //     <Heading paddingBottom='1rem'>SignUp!</Heading>
+    //     <Formik
+    //         initialValues={{emailId: "", password:"" , rePassword:""}}   
+    //         validationSchema={SignUpSchema}
+    //         onSubmit={sendSignUpCredentials}
+    //      >
+    //         {({ isSubmitting }) => (
+    //             <Form>
+    //             <CustomInputField
+    //                 label="Email id"
+    //                 name="emailId"
+    //                 type="email"
+    //                 placeholder="example@example.com"
+    //             />
+    //             <br/>
+    //              <CustomInputField
+    //                 label="Password"
+    //                 name="password"
+    //                 type="password"
+    //                 placeholder=""
+    //             />
+    //             <br/>
+    //              <CustomInputField
+    //                 label="confirm Password"
+    //                 name="rePassword"
+    //                 type="password"
+    //                 placeholder=""
+    //             />
+    //             <br/>
+    //             <Button disabled={isSubmitting} type="submit">
+    //                 Submit
+    //             </Button>
+    //             <Text fontSize='xs' paddingTop='1rem'>{error}</Text>
+    //             </Form>
+    //     )}
+    //     </Formik>
+    //     <Text fontSize='xs' paddingTop='1rem'>Already have an account? <Link color='teal.500' href="/login">click here</Link> to login</Text>
+    //  </Box>
+    // </VStack>
+    // )
 }
 const SignupScreen =()=>{
     return(

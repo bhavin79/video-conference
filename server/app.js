@@ -12,6 +12,7 @@ import { getUser } from "./data/users.js";
 import { connectDB } from "./config/mongoConnection.js";
 // import { getClient } from "./config/mongoConnection.js";
 import "dotenv/config.js";
+import { getRedisClient } from "./config/redisConnect.js";
 
 const app = express();
 app.use(express.json());
@@ -30,7 +31,7 @@ io.use(authorizeUser);
 
 app.use((req, res, next) => {
   req.io = io;
-  return next();
+  return next(); 
 });
 
 configRoutes(app);
@@ -92,9 +93,9 @@ configRoutes(app);
 //*********** MEETING CODE *************************
 
 
-
 //*********** call based CODE *************************
 
+let client = await getRedisClient();
 io.on("connect", (socket) =>{  
   const req = socket.request; 
 
@@ -112,39 +113,72 @@ io.on("connect", (socket) =>{
   const user =  socket.request.session.user; //join room with your email;
   const emailId = user.emailId;
   socket.join(emailId); 
-  // socket.on("user:Present", (data)=>{
-  //   socket.to(room).emit("user:Present", {emailId: user.emailId});
-  // });
-  socket.on("call-initiated-join-room", ({meetId, tag})=>{
-    console.log(meetId, tag);
-    socket.join(meetId);
+  socket.on("call-initiated-join-room", async ({meetId: meet, tag})=>{
+    const meetId = await client.get(user.emailId); 
+    if(meetId){
+      socket.join(meetId);
+      console.log(socket.id, meetId, user.emailId);
+    }   
   })  
 
-
-  socket.on("offer", ({data})=>{
-    console.log("inside offer");
-    const {offer, meetId:room} = data;
-    // console.log(offer);
-    socket.to(room).emit("offer:receive", {msg:offer});
+  socket.on("offer", async ({data})=>{//from user@test.com
+    const {offer} = data;
+    const meetId = await client.get(user.emailId); 
+    if(meetId){
+      console.log("--------------------------------------------")
+      console.log(meetId, "offer", user.emailId);
+      console.log(offer);
+      console.log("--------------------------------------------")
+      socket.join(meetId);
+      socket.to(meetId).emit("offer:receive", {msg:offer});
+    }
   });
 
-  socket.on("answer", ({answer, meetId:room})=>{   
-    // console.log(answer);  
-    socket.to(room).emit("answer:received", {answer});
+  socket.on("answer", async (data)=>{    //from user@ex.com
+    // console.log(data);
+    const meetId = await client.get(user.emailId); 
+    if(meetId){
+      console.log("--------------------------------------------")
+      console.log(meetId, "answer", user.emailId);
+      console.log(data.answer);
+      console.log("--------------------------------------------")
+
+      socket.join(meetId);
+      socket.to(meetId).emit("answer:received", {msg: data.answer});
+    }
+  });   
+ 
+  socket.on("icecandidate", async(data)=>{ 
+    const meetId = await client.get(user.emailId); 
+    if(meetId){
+      console.log("--------------------------------------------")
+      console.log(meetId, "icecndiate", user.emailId);
+      console.log("--------------------------------------------")
+
+      socket.join(meetId);
+      const {candiates, emailId} = data; 
+      socket.to(meetId).emit("icecandidate:receive", {msg:candiates});
+    }
+  });
+
+  socket.on("callEnd", async(data)=>{
+    const meetId = await client.get(user.emailId); 
+    socket.to(meetId).emit("callEnd:receive",{msg: "call end"});
+  });
+  
+  socket.on("disconnect", async ()=>{ 
+    const meetId = await client.get(user.emailId); 
+    if(meetId){
+      socket.leave(meetId);
+    }
+
   });  
 
-  socket.on("icecandiate", (data)=>{
-    console.log(data); 
-    const {candiates, meetId: room} = data;
-    socket.to(room).emit("icecandiate:receive", {msg:candiates});
-  });
-
-  socket.on("disconnect", ()=>{ 
-      // socket.leave(user.meetId);
-  }); 
-
-  socket.on("reconnect", ()=>{
-      // socket.join(user.meetId);
+  socket.on("reconnect", async()=>{
+    const meetId = await client.get(user.emailId); 
+    if(meetId){
+      socket.join(meetId);
+    }
   }) 
   
 });

@@ -4,10 +4,9 @@ import SignupScreen from './components/authentication/SignupScreen';
 import { useNavigate } from "react-router-dom";
 
 import './App.css';
-import HomeScreen from './components/home/HomeScreen';
 import Meet from "./components/meet/Meet"
-import { useState } from 'react';
 import { useAuth } from './components/conextAPI/authContext';
+import Call from './components/call/Call';
 
 function App() {
   const {loggedIn, logoutHandle} =  useAuth();
@@ -40,9 +39,9 @@ function App() {
   }
   return (
     <main className="App">
-        <div className='nav'>
+        <div  className='flex justify-around text-base font-normal h-12 bg-neutral text-neutral-content text-white items-center'>
           <span>{navValues[0]}</span>
-          <span className='navLinks'>
+          <span className='flex justify-around w-32'>
             {navValues.map((data, i)=>{
                 if(i ==0){
                   return;
@@ -56,7 +55,7 @@ function App() {
       <Routes>
         <Route path ='/login' element={<LoginScreen />} />
         <Route path='/signup' element={<SignupScreen/>}/>
-        <Route path='/' element={<HomeScreen/>} />
+        <Route path='/' element={<Call/>} />
         <Route path = "/meet/:id" element={<Meet/>} />
       </Routes>
     </main>
