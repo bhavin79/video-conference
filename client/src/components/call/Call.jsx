@@ -9,6 +9,10 @@ import { useAuth } from "../conextAPI/authContext";
 import { useNavigate } from "react-router-dom";
 import HomeScreen from "../home/HomeScreen";
 
+//TODO: Figure out how to stop stream. 
+//TODO: start with CSS;
+
+
 const Call = ()=>{
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
@@ -62,28 +66,36 @@ const Call = ()=>{
 
     useEffect(()=>{
         connectPeerConnect();
-        startVideoAudio();
+        // startVideoAudio();
     },[]);
 
     const startVideoAudio =  async()=>{
         let stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
-        setLocalStream(stream); 
+        // setLocalStream(stream); 
         stream.getTracks().forEach(track => {
             peerConnection.current.addTrack(track, stream);
         });
         return true;
     };
 
+    const showMyStream =async()=>{
+        let stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+        setLocalStream(stream); 
+    }
+
+
     const handleCall = useCallback(async()=>{
+        let media = await startVideoAudio();
+        if(media){
             try {
                 const response = await callApiCall({emailId: emailId}); 
                 if(response){
-                    console.log("I want to call");
                     socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"caller"});
                 }
             } catch (error) {
                 console.log(error);
             }
+        }
     },[socket])
 
     const handleSendOffer = useCallback(async()=>{
@@ -143,10 +155,11 @@ const Call = ()=>{
     }, [peerConnection]);
 
  
-    const handleIsConnected = useCallback((event)=>{
+    const handleIsConnected = useCallback(async (event)=>{
         if(peerConnection.current.connectionState === 'connected'){
             console.log("connection stable");
             setGotCall(false);
+            await showMyStream();
         }
     },[peerConnection])
 
@@ -159,15 +172,18 @@ const Call = ()=>{
             console.log("Remote EmailID missing");
             return;
           }
-
-        try {
-            let response = await callAcceptApiCall({emailId: remoteEmailId});
-            if(response){
-                socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"callee"});
-                await handleSendOffer();
+          let media = await startVideoAudio();
+          if(media){
+            try {
+                let response = await callAcceptApiCall({emailId: remoteEmailId});
+                if(response){
+                    socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"callee"});
+                    await handleSendOffer();
+                }
+            } catch (error) {
             }
-        } catch (error) {
-        }
+          }
+          
     },[socket]);
     
 
@@ -179,25 +195,6 @@ const Call = ()=>{
     };
 
 
-    const toggleAudio = async()=>{
-        if(peerConnection.current){
-            const senders = peerConnection.current.getSenders();
-            senders.forEach((sender)=> {
-                if(sender.track.kind == 'audio'){
-                    peerConnection.current.removeTrack(sender)
-                 }
-              }
-            )
-        }
-
-        const stream = await navigator.mediaDevices.getUserMedia({video:true, audio:true});
-        setLocalStream(stream); 
-        stream.getTracks().forEach(track => {
-            peerConnection.current.addTrack(track, stream);
-        });
-
-    }
-
     const senderList = async()=>{
         if(peerConnection.current){
             const senders = peerConnection.current.getSenders();
@@ -205,26 +202,35 @@ const Call = ()=>{
         } 
     }
 
-
-
     const handleCallEnd = useCallback( async()=>{
         peerConnection.current.close();
         setRemoteStream(null);
+        if (localStream) {
+            console.log("stop me")
+            localStream.getTracks().forEach(track => track.stop());
+            setLocalStream(null);
+          }
+        // setLocalStream(null);
         let response = await  callEndApiCall();
         if(response){
             connectPeerConnect();
-            await startVideoAudio();
         }
     }, [peerConnection])
 
     const handleLocalCallEnd = useCallback( async()=>{
         peerConnection.current.close();
         setRemoteStream(null);
+        if (localStream) {
+            console.log("stop me")
+
+            localStream.getTracks().forEach(track => track.stop());
+            setLocalStream(null);
+          }
+        // setLocalStream(null);
         socket.emit("callEnd", {msg: "call end"});
         let response = await  callEndApiCall();
         if(response){
             connectPeerConnect();
-            await startVideoAudio();
         }
     
     },[peerConnection, socket]);
@@ -294,11 +300,13 @@ const Call = ()=>{
             </div>
             <div className="col-start-3 col-end-7">
                 {localStream &&
+                <div><h1>YOUR STREAM</h1>
                     <ReactPlayer playing muted
                     width="40%"
                     height="40%"
                     // className="object-cover"
                     url={localStream}></ReactPlayer>
+                    </div>
                 }
 
                 {remoteStream && 
@@ -327,7 +335,6 @@ const Call = ()=>{
             } 
         {remoteStream &&  <div>
                 <button className="btn" onClick={()=>handleLocalCallEnd()} sx={{margin:"1.2rem"}}>end</button>
-                <button className="btn" onClick={()=>toggleAudio()}>Toggle audio - {audioString}</button>
         </div>}
        <div>
        </div>
