@@ -31,7 +31,6 @@ const Call = ()=>{
     const fectchHistory = async()=>{
         let emailId = localStorage.getItem("username");
         let response = await historyApiCall({emailId});
-        console.log(response.data);
         setHistory(response.data);
     }
     useEffect(()=>{
@@ -49,32 +48,46 @@ const Call = ()=>{
 
     const {current:socket} = socketRef;
 
+    useEffect(()=>{
+        socket.connect();
+        socket.on('connect', ()=>{})
+    }, [socket]);
+
     const peerConnection = useRef(null);
     
+    const connectPeerConnect = useCallback(async()=>{
+        const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
+        peerConnection.current = new RTCPeerConnection(configuration);
+    },[peerConnection])
+
+    useEffect(()=>{
+        connectPeerConnect();
+        startVideoAudio();
+    },[]);
+
     const startVideoAudio =  async()=>{
-        setMediaRestart(true);
         let stream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
         setLocalStream(stream); 
         stream.getTracks().forEach(track => {
             peerConnection.current.addTrack(track, stream);
         });
-        setMediaRestart(false);
+        return true;
     };
 
     const handleCall = useCallback(async()=>{
-        try {
-            const response = await callApiCall({emailId: emailId}); 
-            if(response){
-                socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"caller"});
+            try {
+                const response = await callApiCall({emailId: emailId}); 
+                if(response){
+                    console.log("I want to call");
+                    socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"caller"});
+                }
+            } catch (error) {
+                console.log(error);
             }
-        } catch (error) {
-            console.log(error);
-        }
     },[socket])
 
     const handleSendOffer = useCallback(async()=>{
         try {
-            setGotCall(false);
             setInComingEmailId("");
             console.log("peer connection in send offer",peerConnection);
                 const offer = await peerConnection.current.createOffer();
@@ -109,7 +122,6 @@ const Call = ()=>{
 
     const handleIceCandidate = useCallback((event)=>{
         if (event.candidate) {
-            console.log(peerConnection.current.remoteDescription, "REMOTE DESCRIPTION");
             console.log("Ice generated"); 
             if (event.candidate) {
                 const candiates = event.candidate
@@ -120,6 +132,7 @@ const Call = ()=>{
 
     const handleIncomingIceCandidate = useCallback( async(data)=>{
         console.log("Incomming ICe");
+        console.log(peerConnection.current.remoteDescription, "REMOTE DESCRIPTION");
         if(peerConnection.current.remoteDescription){
             try {
                 await peerConnection.current.addIceCandidate(data.msg);
@@ -133,6 +146,7 @@ const Call = ()=>{
     const handleIsConnected = useCallback((event)=>{
         if(peerConnection.current.connectionState === 'connected'){
             console.log("connection stable");
+            setGotCall(false);
         }
     },[peerConnection])
 
@@ -142,8 +156,10 @@ const Call = ()=>{
 
     const handleAcceptCall = useCallback( async(remoteEmailId)=>{
         if (!remoteEmailId) {
+            console.log("Remote EmailID missing");
             return;
           }
+
         try {
             let response = await callAcceptApiCall({emailId: remoteEmailId});
             if(response){
@@ -157,20 +173,9 @@ const Call = ()=>{
 
 
     const handleIncommingCall = async (data)=>{
-        console.log(data.emailId);
+        console.log(data.emailId,"is calling");
         setGotCall(true);
         setInComingEmailId(data.emailId);
-
-        // await handleAcceptCall();
-        // try {
-        //     let response = await callAcceptApiCall({emailId: data.emailId});
-        //     if(response){
-        //         socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"callee"});
-        //         await handleSendOffer();
-        //     }
-        // } catch (error) {
-            
-        // }
     };
 
 
@@ -199,45 +204,32 @@ const Call = ()=>{
             console.log(senders);
         } 
     }
-    senderList();
-    useEffect(()=>{
-        const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
-        peerConnection.current = new RTCPeerConnection(configuration);
-        startVideoAudio();
-        return ()=>{
-            if(peerConnection.current){
-                peerConnection.current.close();
-            }
-        }  
-    },[peerConnection]);
 
-    const handleCallEnd = async()=>{
+
+
+    const handleCallEnd = useCallback( async()=>{
         peerConnection.current.close();
         setRemoteStream(null);
-        await  callEndApiCall();
-        const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
-        peerConnection.current = new RTCPeerConnection(configuration);
-        localStream.getTracks().forEach(track => {
-            peerConnection.current.addTrack(track, localStream);
-        });
-    }
+        let response = await  callEndApiCall();
+        if(response){
+            connectPeerConnect();
+            await startVideoAudio();
+        }
+    }, [peerConnection])
 
-    const handleLocalCallEnd = async()=>{
+    const handleLocalCallEnd = useCallback( async()=>{
         peerConnection.current.close();
         setRemoteStream(null);
         socket.emit("callEnd", {msg: "call end"});
-        await  callEndApiCall();
-        const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}]}
-        peerConnection.current = new RTCPeerConnection(configuration);
-        localStream.getTracks().forEach(track => {
-            peerConnection.current.addTrack(track, localStream);
-        }); };
+        let response = await  callEndApiCall();
+        if(response){
+            connectPeerConnect();
+            await startVideoAudio();
+        }
+    
+    },[peerConnection, socket]);
 
-    useEffect(()=>{
-        socket.connect();
-        socket.on('connect', ()=>{})
 
-    }, [socket]);
 
     useEffect(()=>{
         socket.on("offer:receive", handleOffer);

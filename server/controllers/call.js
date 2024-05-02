@@ -62,13 +62,13 @@ export const callAccept = async(req, res)=>{
     }
     
     //3. add to calling history;
-    try {
-        let addMyHistory = await addCallHistory(req.session.user.id, emailId, true);
-        let calleeHistory = await addCallHistory(callee._id, callAdd.value.emailId, true);
-    } catch (error) {
-        console.log(error);
-        return res.status(400).json(error);
-    }
+    // try {
+    //     let addMyHistory = await addCallHistory(req.session.user.id, emailId, true);
+    //     let calleeHistory = await addCallHistory(callee._id, callAdd.value.emailId, true);
+    // } catch (error) {
+    //     console.log(error);
+    //     return res.status(400).json(error);
+    // }
     return res.status(200).json({meetId: callee.currentCalll.meetId}); //send meetId to join socket room on connect;
 };
 
@@ -80,7 +80,7 @@ export const callEnd =async (req, res)=>{
     let currentCallDel = await removeCurrentCallInfo(req.session.user.id);
 
     let redisClient = await getRedisClient();
-    await redisClient.DEL(`${req.session.user.id}`);
+    await redisClient.DEL(`${req.session.user.emailId}`);
 
     res.status(200).json({msg: "Call Ended"});
 };
