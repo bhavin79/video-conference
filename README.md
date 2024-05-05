@@ -1,15 +1,22 @@
-# video-conference
-This is the first iteration of the webRTC-based video call Web App. WebRTC is a **low-latenc**y peer-to-peer communication technology used by web apps like **Zoom** and **Google Meet**.
-To establish a WebRTC connection, a signaling server is a must. The purpose of the signaling server is to share information between users who want to start a video call.
-I have created the signaling server using ExpressJS and SocketIO. It utilizes REST API for authentication, generation of meeting information, and a unique room. It uses WebSocket for sharing ICE Candidates as soon as both users join the room.
-Authorization is established using Express sessions. This session is shared between WebSocket endpoints and REST API endpoints.
-All the data is persisted onto MongoDB Atlas.
-Lastly, the server uses CORS for both HTTP connections and WebSocket connections. Only the frontend can access the backend.
+# Video Call (Renamed from Video Conference)
+This is the second iteration of the WebRTC-based video call web app. WebRTC is a low-latency open-source communication protocol used by web apps like Zoom and Google Meet.
 
-And now, the frontend – the most challenging part for a backend engineer like me!
+WebRTC stands out because it creates a decentralized communication channel. Even though the protocol itself is decentralized, the initial process to set up the connection between peers is centralized through a signaling server. Since video calling is a real-time process, the signaling server needs to use WebSocket to streamline the entire process.
 
-It utilizes React. It uses Chakra UI for design, YUP and Formik for input validations,Axios for api calls and client-Socket.IO for WebSocket communication.
-React handles the WebRTC connection between the clients. It also handles the streaming of video between the clients.
+I have designed and developed the signaling server using Node.js. The signaling server hosts two separate servers, one for the REST API and the other for WebSocket communication. The REST API is used for authentication and generation of unique call IDs, while WebSocket is used for bidirectional sharing of protocol-related unique information as soon as the call is accepted. At the same time, session information is persisted in Redis, and data is persisted in MongoDB.
+
+The frontend uses React, Tailwind CSS, and react-hook-form.
+
+
+## Installation
+
+1. Clone the repository.
+2. Navigate to client directory and run npm install to install dependencies.
+3. Navigate to server directory and run npm install to install dependencies.
+4. Set up MongoDB and Redis servers (with default ports.)
+5. Run npm start in server directory and npm run dev in client directory. 
+
+
 
 ## To summarize:
 The application follows a 3-tier architecture.
@@ -17,7 +24,4 @@ At the presentation layer, I have implemented ReactJS.
 At the application layer, ExpressJS and Socket.IO are utilized.
 At the data layer, it uses MongoDB.
 
-## Future goals for version 1.2
-- [ ] improve user experence using react
-- [X] improve webRTC error handling
-- [ ] Implement redis for robust session handling
+
