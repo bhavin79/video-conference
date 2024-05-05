@@ -35,63 +35,6 @@ app.use((req, res, next) => {
 });
 
 configRoutes(app);
-//*********** MEETING CODE *************************
-
-// io.on("connect", (socket) =>{  
-//     const req = socket.request; 
-
-//     //get meet id for the user
-//     socket.use((__, next) => {
-//         req.session.reload((err) => {
-//           if (err) {
-//             socket.disconnect();
-//           } else {
-//             next();
-//           }
-//         });
-//         req.session.save();
-//       }); 
-//     const user =  socket.request.session.user;
-//     const room = user.meetId;
-//     socket.join(room);
- 
-//     // socket.on("user:Present", (data)=>{
-//     //   socket.to(room).emit("user:Present", {emailId: user.emailId});
-//     // });
-
-//     socket.on("offer", ({data})=>{
-//       console.log("inside offer");
-//       const {offer} = data;
-//       // console.log(offer);
-//       socket.to(room).emit("offer:receive", {msg:offer});
-//     });
-
-//     socket.on("answer", ({answer})=>{   
-//       // console.log(answer);  
-//       socket.to(room).emit("answer:received", {answer});
-//     });  
-
-//     socket.on("icecandiate", (data)=>{
-//       console.log(data); 
-//       const {candiates} = data;
-//       socket.to(room).emit("icecandiate:receive", {msg:data});
-//     });
-
-//     socket.on("disconnect", ()=>{ 
-//         // socket.leave(user.meetId);
-//     });
-
-//     socket.on("reconnect", ()=>{
-//         // socket.join(user.meetId);
-//     }) 
-    
-// });
-// httpServer.listen(8000, ()=>{
-//   console.log("Server is listening on port 8000 localhost");
-// })
-
-//*********** MEETING CODE *************************
-
 
 //*********** call based CODE *************************
 
@@ -99,7 +42,6 @@ let client = await getRedisClient();
 io.on("connect", (socket) =>{  
   const req = socket.request; 
 
-  //get meet id for the user
   socket.use((__, next) => {
       req.session.reload((err) => {
         if (err) {
@@ -113,6 +55,7 @@ io.on("connect", (socket) =>{
   const user =  socket.request.session.user; //join room with your email;
   const emailId = user.emailId;
   socket.join(emailId); 
+  
   socket.on("call-initiated-join-room", async ({meetId: meet, tag})=>{
     const meetId = await client.get(user.emailId); 
     if(meetId){
@@ -186,7 +129,9 @@ httpServer.listen(8000, ()=>{
 console.log("Server is listening on port 8000 localhost");
 })
 
-// let client
+
+// ************** For MongoDB atlas **********
+// let client 
  
 // const start = async () => { 
 //     try {
