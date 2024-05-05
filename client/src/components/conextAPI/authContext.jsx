@@ -5,6 +5,7 @@ const ApiProvider = ({ children }) => {
     const [loggedIn, setLoggedIn] = useState(localStorage.getItem("userLoggedIn") || false);
     const logoutHandle =()=>{
         localStorage.removeItem('userLoggedIn');
+        localStorage.removeItem("username");
         setLoggedIn(false);
     }
     const loginHandle= ()=>{

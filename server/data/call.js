@@ -47,5 +47,11 @@ export const addCallHistory = async(userId, calleeEmailId, Accpeted)=>{
 
 export const getHistoryByEmailId = async (emailId)=>{
     let user = await getOne(users,{emailId: emailId});
-    return user.PreviousCalls;
+    let calls =[];
+    let total = user.PreviousCalls.length-1;
+    for(let i= total; i >total-10 && i>=0; i--){
+        calls.push(user.PreviousCalls[i]);
+    }
+    
+    return calls;
 }

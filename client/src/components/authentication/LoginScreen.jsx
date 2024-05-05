@@ -4,6 +4,7 @@ import { loginApiCall } from "../../service/apiCalls";
 import { useAuth } from "../conextAPI/authContext";
 import { useForm } from "react-hook-form";
 import { Link } from "react-router-dom";
+import { useEffect } from "react";
 
 const LoginForm = ()=>{      
     const navigate = useNavigate();
@@ -14,6 +15,12 @@ const LoginForm = ()=>{
         handleSubmit,
         formState: { errors }
       } = useForm();
+      useEffect(()=>{
+        let emailId = localStorage.getItem("username");
+        if(emailId){
+            return navigate("/");
+        }
+      },[])
 
     const sendLoginCredentials = async(formData)=>{
         try {
@@ -79,56 +86,13 @@ const LoginForm = ()=>{
                     </div>
                     <button className="btn w-2/4 self-center mb-6" type="submit">Login!</button>
             </form>
-            <p className="text-base"> Dont have an account? <Link to="/signup" className="text-lime-600 hover:text-lime-400">click here</Link> to create one</p>
+            <p className="text-base"> Dont have an account? <Link to="/signup" className="text-lime-600 hover:text-lime-400 hover:cursor-pointer">click here</Link> to create one</p>
 
             </div>
             {error && <p className="text-orange-600">{error}</p>}
 
         </div>
     </div>
-
-        
-//  (
-    //     <VStack
-    //     justify="center"
-    //     h="100vh"
-    //     spacing="0.2rem"
-    //   >
-    //     <Box boxShadow='base' p='6' rounded='md' bg='#fcfcfc' padding='5rem'> 
-    //     <Heading>Login!</Heading>
-     
-    //     <Formik
-    //         initialValues={{emailId: "", password:""}}
-    //         validationSchema={LogInSchema}
-    //         onSubmit={sendLoginCredentials}
-    //     >
-    //           {({ isSubmitting }) => (
-    //             <Form>
-    //             <CustomInputField
-    //                 label="Email id"
-    //                 name="emailId"
-    //                 type="email"
-    //                 placeholder="example@example.com"
-    //             />
-    //             <br/>
-    //              <CustomInputField
-    //                 label="Password"
-    //                 name="password"
-    //                 type="password"
-    //                 placeholder="password.."
-    //             />
-    //             <br/>
-    //             <Button disabled={isSubmitting} type="submit">
-    //                 Submit</Button>
-    //             <br/>
-    //             {error}
-    //             </Form>
-    //     )}
-    //     </Formik>
-    //     <Text fontSize='xs' paddingTop='1rem'>Dont have an account? <Link color='teal.500' href="/signup" >click here</Link> to create one</Text>
-    //     </Box>
-    // </VStack>
-    // )
 }
 const LoginScreen = ()=>{  
     return (

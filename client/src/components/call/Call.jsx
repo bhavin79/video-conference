@@ -1,4 +1,3 @@
-import { Button, Card, CardBody, Center, Grid, GridItem, Input, Text } from "@chakra-ui/react";
 import { useRef } from "react";
 import { useCallback } from "react";
 import { useState, useEffect } from "react";
@@ -7,25 +6,21 @@ import ReactPlayer from "react-player";
 import { callAcceptApiCall, callApiCall, callEndApiCall, historyApiCall, ping } from "../../service/apiCalls";
 import { useAuth } from "../conextAPI/authContext";
 import { useNavigate } from "react-router-dom";
-import HomeScreen from "../home/HomeScreen";
-
-//TODO: Figure out how to stop stream. 
-//TODO: start with CSS;
-
+import { IoIosSearch } from "react-icons/io";
 
 const Call = ()=>{
     const [localStream, setLocalStream] = useState(null);
     const [remoteStream, setRemoteStream] = useState(null);
     const [emailId, setEmailId] = useState("");
     const navigate = useNavigate();
-    const {loggedIn} = useAuth();
+    const {loggedIn, logoutHandle} = useAuth();
     const socketRef = useRef(null);
     const [audio, setAudio] = useState(true);
     const [gotCall, setGotCall] = useState(false);
     const [inCommingEmailId, setInComingEmailId] = useState("");
     const [history, setHistory] = useState([]);
-    const [mediaRestart, setMediaRestart] = useState(false);
-
+    const [makeCall, setMakeCall] = useState(false);
+    const [reload, setReload] = useState();
     useEffect(()=>{
         if (!loggedIn){
           return navigate("/login");
@@ -34,27 +29,34 @@ const Call = ()=>{
 
     const fectchHistory = async()=>{
         let emailId = localStorage.getItem("username");
-        let response = await historyApiCall({emailId});
-        setHistory(response.data);
+        try {
+            let response = await historyApiCall({emailId});
+            setHistory(response.data);
+
+        } catch (error) {
+            logoutHandle();
+            return navigate("/login");
+        }
+
     }
     useEffect(()=>{
-        try {
-            fectchHistory();
-        } catch (error) { 
-        }
-    },[])
+        fectchHistory();
+      
+    },[reload]);
 
     socketRef.current = new io("localhost:8000", {
             autoConnect: false,
             withCredentials:true,
         });
 
-
     const {current:socket} = socketRef;
 
+    
+
     useEffect(()=>{
+        const dummyOnConnect =()=>{}
         socket.connect();
-        socket.on('connect', ()=>{})
+        socket.on('connect',dummyOnConnect)  
     }, [socket]);
 
     const peerConnection = useRef(null);
@@ -84,19 +86,19 @@ const Call = ()=>{
     }
 
 
-    const handleCall = useCallback(async()=>{
-        let media = await startVideoAudio();
-        if(media){
-            try {
-                const response = await callApiCall({emailId: emailId}); 
-                if(response){
-                    socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"caller"});
+    const handleCall = useCallback(async(calleeEmailId)=>{
+            let media = await startVideoAudio();
+            if(media){
+                try {
+                    const response = await callApiCall({emailId: emailId}); 
+                    if(response){
+                        socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"caller"});
+                    }
+                } catch (error) {
+                    console.log(error);
                 }
-            } catch (error) {
-                console.log(error);
             }
-        }
-    },[socket])
+    },[socket, makeCall])
 
     const handleSendOffer = useCallback(async()=>{
         try {
@@ -172,18 +174,18 @@ const Call = ()=>{
             console.log("Remote EmailID missing");
             return;
           }
-          let media = await startVideoAudio();
-          if(media){
-            try {
-                let response = await callAcceptApiCall({emailId: remoteEmailId});
-                if(response){
-                    socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"callee"});
-                    await handleSendOffer();
-                }
-            } catch (error) {
+            let media = await startVideoAudio();
+            if(media){
+              try {
+                  let response = await callAcceptApiCall({emailId: remoteEmailId});
+                  if(response){
+                      socket.emit("call-initiated-join-room", {meetId: response.data.meetId, tag:"callee"});
+                      await handleSendOffer();
+                  }
+              } catch (error) {
+              }
             }
-          }
-          
+
     },[socket]);
     
 
@@ -205,12 +207,9 @@ const Call = ()=>{
     const handleCallEnd = useCallback( async()=>{
         peerConnection.current.close();
         setRemoteStream(null);
-        if (localStream) {
-            console.log("stop me")
-            localStream.getTracks().forEach(track => track.stop());
-            setLocalStream(null);
-          }
-        // setLocalStream(null);
+        setLocalStream(null);
+        setReload(reload+1);
+
         let response = await  callEndApiCall();
         if(response){
             connectPeerConnect();
@@ -220,13 +219,9 @@ const Call = ()=>{
     const handleLocalCallEnd = useCallback( async()=>{
         peerConnection.current.close();
         setRemoteStream(null);
-        if (localStream) {
-            console.log("stop me")
+        setLocalStream(null);
+        setReload(reload+1);
 
-            localStream.getTracks().forEach(track => track.stop());
-            setLocalStream(null);
-          }
-        // setLocalStream(null);
         socket.emit("callEnd", {msg: "call end"});
         let response = await  callEndApiCall();
         if(response){
@@ -234,7 +229,6 @@ const Call = ()=>{
         }
     
     },[peerConnection, socket]);
-
 
 
     useEffect(()=>{
@@ -267,77 +261,152 @@ const Call = ()=>{
     },[socket, handleOffer, handleAnswer, handleIceCandidate, handleIncomingIceCandidate, handleIsConnected, handleIncomingTracks, peerConnection])
 
 
-
     let audioString = audio?"enabled":"disabled"
     return <>
-        <div>
-        <div className="grid grid-cols-6 h-screen">
-            <div className=" grid col-start-1 col-end-3 overflow-auto">
-                <div className="flex flex-col m-2">
-                    <div className=" flex border border-solid">
-                        <input  name="emailId"
-                            className="input"
-                            type="email"
-                            placeholder="example@example.com" 
-                            value={emailId}
-                            onChange={(e)=>setEmailId(e.target.value)}
-                            /> 
-                        <button className="btn" onClick={handleCall} >Call!</button>
+        <div >
+        <div className="flex h-screen">
+            <div className="basis-2/3">
+                <div className="flex h-full w-full">
+                 {!remoteStream &&
+                    <div className="flex w-full justify-center items-center">
+                        <p className="text-3xl"> Welcome</p>
                     </div>
-                    <div className="">
-                    {history.map((his=>{
-                        let accepted = his.Accpeted?"Received":"Misscalled";
-                        return <div className="flex flex-col border border-solid my-2">
-                            <span className="flex flex-row justify-between">
-                                <p>{his.calleeEmailId}</p>
-                                <p>{accepted}</p>
-                            </span>
-                             <p className="">{his.Timestamp}</p>
+                 }   
+                <div className="relative">
+                    {/* Local Stream */}
+                    {localStream && (
+                    <div className="absolute top-0 left-0 w-1/4 h-1/4 m-4 drop-shadow-3xl z-10">
+                        <div className="card flex-col bg-custom-blue shadow-xl">
+                        <ReactPlayer
+                            playing
+                            muted
+                            width={"inherit"}
+                            height={"inherit"}
+                            url={localStream}
+                        />
+                        <p className="self-center text-custom-white">You</p>
                         </div>
-                    }))}
                     </div>
+                    )}
+
+                    {/* Remote Stream */}
+                    {remoteStream && (
+                    <div className="flex self-start h-9/10 w-9/10 relative">
+                        <ReactPlayer
+                        playing
+                        muted
+                        width={"inherit"}
+                        height={"inherit"}
+                        url={remoteStream}
+                        />
+                        {remoteStream && (
+                        <div className="absolute inset-0 flex justify-center items-end pb-8">
+                           {/* Call Cut   */}
+                            <button
+                            className="px-4 py-2 border-none bg-red-600 hover:bg-red-700 rounded-full text-custom-white"
+                            onClick={() => handleLocalCallEnd()}
+                            sx={{ margin: "1.2rem" }}
+                            >
+                            X
+                            </button>
+                        </div>
+                        )}
+                    </div>
+                    )}
+                </div>
                 </div>
             </div>
-            <div className="col-start-3 col-end-7">
-                {localStream &&
-                <div><h1>YOUR STREAM</h1>
-                    <ReactPlayer playing muted
-                    width="40%"
-                    height="40%"
-                    // className="object-cover"
-                    url={localStream}></ReactPlayer>
-                    </div>
-                }
 
-                {remoteStream && 
-                    <ReactPlayer playing muted 
-                    width="40%"
-                    height="40%"
-                    url={remoteStream}></ReactPlayer>
-                } 
+            <div className="flex overflow-auto bg-custom-white px-10 py-4">
+                <div className="flex flex-col">
+                <div className="flex flex-row">
+                    <label className="input input-bordered flex items-center gap-2 h-10 w-80">
+                    {/* Search input */}
+                    <IoIosSearch />
+                    <input
+                        name="emailId"
+                        className="grow py-1"
+                        type="email"
+                        placeholder="email"
+                        value={emailId}
+                        onChange={(e) => setEmailId(e.target.value)}
+                    />
+                    </label>
+
+                    {/* Call button */}
+                    <button disabled={remoteStream}
+                    className="ml-5 slef-end rounded-md px-3 py-2 bg-white border h-10"
+                    onClick={async ()=>{
+                        handleCall();}}
+                    >
+                    Call!
+                    </button>
+                </div>
+                <div className="pt-4 flex flex-col divide-y-[0.5px] divide-[#7597BF]">
+                    {/* Call history */}
+                    {history.length>0 && history.map((his, index) => {
+                    let accepted = his.Accpeted ? "Accepted" : "Rejected";
+                    his.calleeEmailId = his.calleeEmailId[0].toUpperCase() + his.calleeEmailId.slice(1);
+                    let timeDate = new Date(his.Timestamp);
+                    const yesterdayDate = new Date();
+                    
+                    if (yesterdayDate.toISOString().split('T')[0] == timeDate.toISOString().split('T')[0]) {
+                        let ampm = timeDate.getHours()>=12?"PM":"AM";
+                        let hours = timeDate.getHours() % 12;
+                        hours = hours ? hours : 12
+                        let minutes = timeDate.getMinutes()<10? '0'+timeDate.getMinutes(): timeDate.getMinutes();
+                        timeDate = `${hours}: ${minutes} ${ampm}`;
+                    } else {
+                        timeDate = `${timeDate.getMonth() + 1}/${timeDate.getDate()}`;
+                    }
+                    return (
+                        <div className="flex flex-col my-2 p-4" key={index}>
+                        <span className="flex flex-row justify-between">
+                            <p>{his.calleeEmailId}</p>
+                            <p className="">{accepted}</p>
+                        </span>
+                        <p className="self-start">{timeDate}</p>
+                        </div>
+                    );
+                    })}
+                </div>
+                </div>
             </div>
-        </div>
+            </div>
+
+            {/* Call Recived Pop Up */}
             {gotCall &&
                 <dialog open id={"Call"} className="modal">
                 <div className="modal-box">
                 <p className="text-xl">{inCommingEmailId} is calling...</p>
                 <form method="dialog">
                     <div className="flex justify-evenly my-4">
-                        <button className="btn" onClick={()=>handleAcceptCall(inCommingEmailId)}> Accept</button>
+                        <button className="btn" onClick={()=>{
+                            handleAcceptCall(inCommingEmailId)
+                            }}> Accept</button>
                         <button className="btn" onClick={()=>{
                             setGotCall(false); 
                             setInComingEmailId("");}}>Reject</button>
                     </div>
-
                   </form>
                 </div>
             </dialog>
             } 
-        {remoteStream &&  <div>
-                <button className="btn" onClick={()=>handleLocalCallEnd()} sx={{margin:"1.2rem"}}>end</button>
-        </div>}
-       <div>
-       </div>
+        {/* Make Call Pop UP */}
+        {makeCall &&
+                <dialog open id={"MakeCallAgain"} className="modal">
+                <div className="modal-box">
+                <p className="text-xl">You are calling {emailId}</p>
+                <form method="dialog">
+                    <div className="flex justify-evenly my-4">
+                        <button className="btn" onClick={()=>{
+                            setGotCall(false); 
+                            setInComingEmailId("");}}>Reject</button>
+                    </div>
+                  </form>
+                </div>
+            </dialog>
+            } 
     </div> 
     </>
 }

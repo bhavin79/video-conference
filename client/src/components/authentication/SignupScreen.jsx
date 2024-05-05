@@ -1,4 +1,4 @@
-import {useState,} from "react";
+import {useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 
 import { signUpApiCall } from "../../service/apiCalls";
@@ -16,6 +16,13 @@ const SignUpForm =()=>{
         formState: { errors },
         watch
       } = useForm();
+
+      useEffect(()=>{
+        let emailId = localStorage.getItem("username");
+        if(emailId){
+            return navigate("/");
+        }
+      },[])
 
     const sendSignUpCredentials = async(formData)=>{        
         const data = {
@@ -98,59 +105,12 @@ const SignUpForm =()=>{
                     </div>
                     <button className="btn w-2/4 self-center mb-6" type="submit">SingUp!</button>
             </form>
-            <p className="text-base"> Already have an account? <Link to="/login" className="text-lime-600 hover:text-lime-400">click here</Link> to login</p>
+            <p className="text-base"> Already have an account? <Link to="/login" className="text-lime-600 hover:text-lime-400 hover:cursor-pointer">click here</Link> to login</p>
             </div>
             {error && <p className="text-orange-600">{error}</p>}
 
         </div>
     </div>
-    // return(
-    //     <VStack
-    //     justify="center"
-    //     h="100vh"
-    //     spacing="0.3rem"
-    //   >
-    //     <Box boxShadow='base' p='6' rounded='md' bg='#fcfcfc' padding='7rem'> 
-    //     <Heading paddingBottom='1rem'>SignUp!</Heading>
-    //     <Formik
-    //         initialValues={{emailId: "", password:"" , rePassword:""}}   
-    //         validationSchema={SignUpSchema}
-    //         onSubmit={sendSignUpCredentials}
-    //      >
-    //         {({ isSubmitting }) => (
-    //             <Form>
-    //             <CustomInputField
-    //                 label="Email id"
-    //                 name="emailId"
-    //                 type="email"
-    //                 placeholder="example@example.com"
-    //             />
-    //             <br/>
-    //              <CustomInputField
-    //                 label="Password"
-    //                 name="password"
-    //                 type="password"
-    //                 placeholder=""
-    //             />
-    //             <br/>
-    //              <CustomInputField
-    //                 label="confirm Password"
-    //                 name="rePassword"
-    //                 type="password"
-    //                 placeholder=""
-    //             />
-    //             <br/>
-    //             <Button disabled={isSubmitting} type="submit">
-    //                 Submit
-    //             </Button>
-    //             <Text fontSize='xs' paddingTop='1rem'>{error}</Text>
-    //             </Form>
-    //     )}
-    //     </Formik>
-    //     <Text fontSize='xs' paddingTop='1rem'>Already have an account? <Link color='teal.500' href="/login">click here</Link> to login</Text>
-    //  </Box>
-    // </VStack>
-    // )
 }
 const SignupScreen =()=>{
     return(

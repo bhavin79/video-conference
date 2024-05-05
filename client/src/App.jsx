@@ -7,6 +7,7 @@ import './App.css';
 import Meet from "./components/meet/Meet"
 import { useAuth } from './components/conextAPI/authContext';
 import Call from './components/call/Call';
+import { NotFound } from './NotFound';
 
 function App() {
   const {loggedIn, logoutHandle} =  useAuth();
@@ -14,7 +15,7 @@ function App() {
 
   let navValues = [];
   if(loggedIn){
-    navValues = [localStorage.getItem("username"), "Logout"];
+    navValues = ["Welcome", localStorage.getItem("username"), "Logout"];
   }
   if(!loggedIn){
     navValues = ["Welcome", "Login" , "Sign Up"];
@@ -39,24 +40,23 @@ function App() {
   }
   return (
     <main className="App">
-        <div  className='flex justify-around text-base font-normal h-12 bg-neutral text-neutral-content text-white items-center'>
+        <div  className='flex justify-around text-base font-normal h-12 bg-custom-blue text-neutral-cutom-white text-white items-center'>
           <span>{navValues[0]}</span>
-          <span className='flex justify-around w-32'>
+          <span className='flex'>
             {navValues.map((data, i)=>{
                 if(i ==0){
                   return;
                 }
-                  return <span onClick={()=>handleNavigation(data)}>{data}</span>
+                  return <span className='mx-2 hover:cursor-pointer' onClick={()=>handleNavigation(data)}>{data}</span>
               })}
-          </span>
-          
+          </span>   
         </div>
 
       <Routes>
         <Route path ='/login' element={<LoginScreen />} />
         <Route path='/signup' element={<SignupScreen/>}/>
         <Route path='/' element={<Call/>} />
-        <Route path = "/meet/:id" element={<Meet/>} />
+        <Route path='*' element={<NotFound/>}/>
       </Routes>
     </main>
   );

@@ -4,7 +4,16 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],  theme: {
-    extend: {},
+    extend: {
+      colors:{
+        "custom-blue": "#2F3C7E",
+        "custom-white": "#ECECEC"
+      },
+      height: {
+        '9/10': '90%',
+      }
+      
+    },
   },
   plugins: [require("daisyui")],
   daisyui: {

@@ -176,7 +176,7 @@ io.on("connect", (socket) =>{
 
   socket.on("reconnect", async()=>{
     const meetId = await client.get(user.emailId); 
-    if(meetId){
+    if(meetId){ 
       socket.join(meetId);
     }
   }) 

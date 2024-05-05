@@ -62,13 +62,13 @@ export const callAccept = async(req, res)=>{
     }
     
     //3. add to calling history;
-    // try {
-    //     let addMyHistory = await addCallHistory(req.session.user.id, emailId, true);
-    //     let calleeHistory = await addCallHistory(callee._id, callAdd.value.emailId, true);
-    // } catch (error) {
-    //     console.log(error);
-    //     return res.status(400).json(error);
-    // }
+    try {
+        let addMyHistory = await addCallHistory(req.session.user.id, emailId, true);
+        let calleeHistory = await addCallHistory(callee._id, callAdd.value.emailId, true);
+    } catch (error) {
+        console.log(error);
+        return res.status(400).json(error);
+    }
     return res.status(200).json({meetId: callee.currentCalll.meetId}); //send meetId to join socket room on connect;
 };
 
@@ -99,5 +99,6 @@ export const getHistory = async (req, res)=>{
         return res.status(403).json({msg: "You are not Authorized"});
     }
     let history = await getHistoryByEmailId(emailId);
+    
     res.status(200).json(history);
 }
