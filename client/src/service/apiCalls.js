@@ -48,8 +48,8 @@ const callEndApiCall = async () => {
   let response = await backend.get("call/callEnd");
   return response;
 };
-const historyApiCall = async (data) => {
-  let response = await backend.post("call/history", data);
+const historyApiCall = async () => {
+  let response = await backend.get("call/history");
   return response;
 };
 export {

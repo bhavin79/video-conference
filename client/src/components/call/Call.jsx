@@ -8,11 +8,12 @@ import {
   callApiCall,
   callEndApiCall,
   historyApiCall,
-  ping,
 } from "../../service/apiCalls";
 import { useAuth } from "../conextAPI/authContext";
 import { useNavigate } from "react-router-dom";
 import { IoIosSearch } from "react-icons/io";
+import { RxCross2 } from "react-icons/rx";
+import { Sidebar } from "./SideBar";
 
 const Call = () => {
   const [localStream, setLocalStream] = useState(null);
@@ -21,43 +22,26 @@ const Call = () => {
   const navigate = useNavigate();
   const { loggedIn, logoutHandle } = useAuth();
   const socketRef = useRef(null);
-  const [audio, setAudio] = useState(true);
   const [gotCall, setGotCall] = useState(false);
   const [inCommingEmailId, setInComingEmailId] = useState("");
   const [history, setHistory] = useState([]);
-  const [makeCall, setMakeCall] = useState(false);
   const [reload, setReload] = useState();
+
   useEffect(() => {
     if (!loggedIn) {
       return navigate("/login");
     }
   }, [loggedIn]);
 
-  const fectchHistory = async () => {
-    let emailId = localStorage.getItem("username");
-    try {
-      let response = await historyApiCall({ emailId });
-      setHistory(response.data);
-    } catch (error) {
-      logoutHandle();
-      return navigate("/login");
-    }
-  };
-  useEffect(() => {
-    fectchHistory();
-  }, [reload]);
-
   socketRef.current = new io("localhost:8000", {
     autoConnect: false,
     withCredentials: true,
   });
-
   const { current: socket } = socketRef;
 
   useEffect(() => {
-    const dummyOnConnect = () => {};
     socket.connect();
-    socket.on("connect", dummyOnConnect);
+    console.log(socket);
   }, [socket]);
 
   const peerConnection = useRef(null);
@@ -99,11 +83,10 @@ const Call = () => {
       let media = await startVideoAudio();
       if (media) {
         try {
-          const response = await callApiCall({ emailId: emailId });
+          const response = await callApiCall({ emailId: calleeEmailId }); //initiate the call;
           if (response) {
             socket.emit("call-initiated-join-room", {
               meetId: response.data.meetId,
-              tag: "caller",
             });
           }
         } catch (error) {
@@ -111,13 +94,12 @@ const Call = () => {
         }
       }
     },
-    [socket, makeCall]
+    [socket]
   );
 
   const handleSendOffer = useCallback(async () => {
     try {
       setInComingEmailId("");
-      console.log("peer connection in send offer", peerConnection);
       const offer = await peerConnection.current.createOffer();
       await peerConnection.current.setLocalDescription(offer);
       console.log("sent offer", { offer });
@@ -190,6 +172,7 @@ const Call = () => {
       if (peerConnection.current.connectionState === "connected") {
         console.log("connection stable");
         setGotCall(false);
+        // setMakeCall(false);
         await showMyStream();
       }
     },
@@ -241,6 +224,7 @@ const Call = () => {
     setRemoteStream(null);
     setLocalStream(null);
     setReload(reload + 1);
+    setGotCall(false);
 
     let response = await callEndApiCall();
     if (response) {
@@ -253,6 +237,7 @@ const Call = () => {
     setRemoteStream(null);
     setLocalStream(null);
     setReload(reload + 1);
+    setGotCall(false);
 
     socket.emit("callEnd", { msg: "call end" });
     let response = await callEndApiCall();
@@ -310,7 +295,6 @@ const Call = () => {
     peerConnection,
   ]);
 
-  let audioString = audio ? "enabled" : "disabled";
   return (
     <>
       <div>
@@ -331,7 +315,7 @@ const Call = () => {
                     className="absolute top-[7%] left-0 m-4 z-20"
                     style={{ width: "20%", height: "20%" }}
                   >
-                    <div className="card flex-col bg-custom-blue shadow-xl">
+                    <div className="card rounded-sm flex-col bg-custom-blue shadow-xl">
                       <ReactPlayer
                         playing
                         muted
@@ -360,10 +344,10 @@ const Call = () => {
                     {/* Call End Button - positioned in the bottom center */}
                     <div className="absolute bottom-[7%] left-1/2 transform -translate-x-1/2">
                       <button
-                        className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-full text-white"
+                        className="px-4 py-4 bg-red-600 hover:bg-red-700 rounded-full text-white"
                         onClick={() => handleLocalCallEnd()}
                       >
-                        X
+                        <RxCross2 />
                       </button>
                     </div>
                   </div>
@@ -373,72 +357,12 @@ const Call = () => {
           </div>
 
           <div className="flex overflow-auto basis-1/3 bg-custom-white px-10 py-4">
-            <div className="flex flex-col">
-              <div className="flex flex-row">
-                <label className="input input-bordered flex items-center gap-2 h-10 w-80">
-                  {/* Search input */}
-                  <IoIosSearch />
-                  <input
-                    name="emailId"
-                    className="grow py-1"
-                    type="email"
-                    placeholder="email"
-                    value={emailId}
-                    onChange={(e) => setEmailId(e.target.value)}
-                  />
-                </label>
-
-                {/* Call button */}
-                <button
-                  disabled={remoteStream}
-                  className="ml-5 slef-end rounded-md px-3 py-2 bg-white border h-10"
-                  onClick={async () => {
-                    handleCall();
-                  }}
-                >
-                  Call!
-                </button>
-              </div>
-              <div className="pt-4 flex flex-col divide-y-[0.5px] divide-[#7597BF]">
-                {/* Call history */}
-                {history.length > 0 &&
-                  history.map((his, index) => {
-                    let accepted = his.Accpeted ? "Accepted" : "Rejected";
-                    his.calleeEmailId =
-                      his.calleeEmailId[0].toUpperCase() +
-                      his.calleeEmailId.slice(1);
-                    let timeDate = new Date(his.Timestamp);
-                    const yesterdayDate = new Date();
-
-                    if (
-                      yesterdayDate.toISOString().split("T")[0] ==
-                      timeDate.toISOString().split("T")[0]
-                    ) {
-                      let ampm = timeDate.getHours() >= 12 ? "PM" : "AM";
-                      let hours = timeDate.getHours() % 12;
-                      hours = hours ? hours : 12;
-                      let minutes =
-                        timeDate.getMinutes() < 10
-                          ? "0" + timeDate.getMinutes()
-                          : timeDate.getMinutes();
-                      timeDate = `${hours}: ${minutes} ${ampm}`;
-                    } else {
-                      timeDate = `${
-                        timeDate.getMonth() + 1
-                      }/${timeDate.getDate()}`;
-                    }
-                    return (
-                      <div className="flex flex-col my-2 p-4" key={index}>
-                        <span className="flex flex-row justify-between">
-                          <p>{his.calleeEmailId}</p>
-                          <p className="">{accepted}</p>
-                        </span>
-                        <p className="self-start">{timeDate}</p>
-                      </div>
-                    );
-                  })}
-              </div>
-            </div>
+            <Sidebar
+              handleCall={handleCall}
+              remoteStream={remoteStream}
+              handleLocalCallEnd={handleLocalCallEnd}
+              reload={reload}
+            />
           </div>
         </div>
 
@@ -458,27 +382,6 @@ const Call = () => {
                     {" "}
                     Accept
                   </button>
-                  <button
-                    className="btn"
-                    onClick={() => {
-                      setGotCall(false);
-                      setInComingEmailId("");
-                    }}
-                  >
-                    Reject
-                  </button>
-                </div>
-              </form>
-            </div>
-          </dialog>
-        )}
-        {/* Make Call Pop UP */}
-        {makeCall && (
-          <dialog open id={"MakeCallAgain"} className="modal">
-            <div className="modal-box">
-              <p className="text-xl">You are calling {emailId}</p>
-              <form method="dialog">
-                <div className="flex justify-evenly my-4">
                   <button
                     className="btn"
                     onClick={() => {
