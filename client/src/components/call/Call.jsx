@@ -374,7 +374,7 @@ const Call = () => {
               <form method="dialog">
                 <div className="flex justify-evenly my-4">
                   <button
-                    className="btn"
+                    className="btn hover:bg-green-500"
                     onClick={() => {
                       handleAcceptCall(inCommingEmailId);
                     }}
@@ -383,7 +383,7 @@ const Call = () => {
                     Accept
                   </button>
                   <button
-                    className="btn"
+                    className="btn hover:bg-red-500"
                     onClick={() => {
                       setGotCall(false);
                       setInComingEmailId("");

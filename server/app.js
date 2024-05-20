@@ -1,16 +1,12 @@
 import express, { urlencoded } from "express";
 import configRoutes from "./routes/index.js";
 import cors from "cors";
-import session from "express-session";
 import { Server } from "socket.io";
 import { createServer } from "http";
 import authorizeUser from "./websocket/socketController.js";
-import websocketEvenets from "./websocket/events.js";
 import sessionMiddleware from "./middleware/sessionMiddleware.js";
 import { corsConfig } from "./config/settings.js";
-import { getUser } from "./data/users.js";
 import { connectDB } from "./config/mongoConnection.js";
-// import { getClient } from "./config/mongoConnection.js";
 import "dotenv/config.js";
 import { getRedisClient } from "./config/redisConnect.js";
 
@@ -39,7 +35,6 @@ configRoutes(app);
 
 let client = await getRedisClient();
 io.on("connect", (socket) => {
-  console.log("connect");
   const req = socket.request;
   socket.use((__, next) => {
     req.session.reload((err) => {
@@ -111,9 +106,8 @@ io.on("connect", (socket) => {
   });
 
   socket.on("disconnect", async () => {
-    console.log("disconnect");
     // const meetId = await client.get(user.emailId);
-    // if(meetId){
+    // if (meetId) {
     //   socket.leave(meetId);
     // }
   });
