@@ -1,4 +1,4 @@
-# Video Call (Renamed from Video Conference)
+# Connect me (Renamed from Video Conference)
 This is the second iteration of the WebRTC-based video call web app. WebRTC is a low-latency open-source communication protocol used by web apps like Zoom and Google Meet.
 
 WebRTC stands out because it creates a decentralized communication channel. Even though the protocol itself is decentralized, the initial process to set up the connection between peers is centralized through a signaling server. Since video calling is a real-time process, the signaling server needs to use WebSocket to streamline the entire process.
